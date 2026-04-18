@@ -1,6 +1,8 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function EntryCard({ entry, onPress }) {
+  const safeEntry = entry ?? {};
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.imageSection}>
@@ -8,16 +10,18 @@ export default function EntryCard({ entry, onPress }) {
       </View>
 
       <View style={styles.infoSection}>
-        <Text style={styles.title}>{entry.title}</Text>
+        <Text style={styles.title}>{safeEntry.title ?? "Untitled"}</Text>
 
         <Text style={styles.preview} numberOfLines={2}>
-          {entry.note}
+          {safeEntry.note ?? "No notes yet."}
         </Text>
 
         <View style={styles.footer}>
-          <Text style={styles.type}>{entry.type}</Text>
-          <Text style={styles.rating}>{entry.rating}/10</Text>
-          <Text style={styles.date}>{entry.date}</Text>
+          <Text style={styles.type}>{safeEntry.type ?? "-"}</Text>
+          <Text style={styles.rating}>
+            {safeEntry.rating != null ? `${safeEntry.rating}/10` : "-"}
+          </Text>
+          <Text style={styles.date}>{safeEntry.date ?? "-"}</Text>
         </View>
       </View>
 
@@ -55,10 +59,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: "600",
-    fontSize: 18,
+    fontSize: 16,
   },
   preview: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#333",
     marginVertical: 4,
   },
@@ -67,13 +71,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   type: {
-    fontSize: 16,
+    fontSize: 14,
   },
   rating: {
-    fontSize: 16,
+    fontSize: 14,
   },
   date: {
-    fontSize: 16,
+    fontSize: 14,
   },
   detailsSection: {
     width: "20%",
@@ -82,7 +86,7 @@ const styles = StyleSheet.create({
     paddingLeft: 6,
   },
   details: {
-    fontSize: 12,
+    fontSize: 10,
     textAlign: "right",
   },
 });

@@ -1,4 +1,5 @@
 // src/components/Navbar.js
+import { usePathname, useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -9,25 +10,37 @@ import profileIcon from "../assets/icons/profile.png";
 import searchIcon from "../assets/icons/search.png";
 
 export default function Navbar() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const navigate = (route) => {
+    if (pathname !== route) {
+      if (typeof document !== "undefined" && document.activeElement) {
+        document.activeElement.blur();
+      }
+      router.replace(route);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigate("/")}>
         <Image source={homeIcon} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigate("/search")}>
         <Image source={searchIcon} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigate("/add")}>
         <Image source={addIcon} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigate("/journal")}>
         <Image source={journalIcon} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigate("/profile")}>
         <Image source={profileIcon} style={styles.icon} />
       </TouchableOpacity>
     </View>
