@@ -1,7 +1,10 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import EntryCard from '../components/EntryCard';
+import Header from "../components/Header";
 import Navbar from '../components/Navbar';
+
 
 const dummyData = [
   {
@@ -31,14 +34,33 @@ const dummyData = [
 ];
 
 export default function MyJournalScreen() {
+  const router = useRouter();
+
+  const handleEntryPress = (entry) => {
+    router.push({
+      pathname: "/entry/[id]",
+      params: {
+        id: entry.id,
+        title: entry.title,
+        note: entry.note,
+        type: entry.type,
+        rating: String(entry.rating ?? ""),
+        date: entry.date,
+      },
+    });
+  };
+
   return (
     <View style={styles.container}>
+      <Header />
       <View style={styles.content}>
         <Text style={styles.header}>My Journal</Text>
         <FlatList
           data={dummyData}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <EntryCard entry={item} />}
+          renderItem={({ item }) => (
+            <EntryCard entry={item} onPress={() => handleEntryPress(item)} />
+          )}
         />
       </View>
       <Navbar />

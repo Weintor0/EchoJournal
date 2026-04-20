@@ -1,6 +1,7 @@
 // src/screens/HomeScreen.js
 import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import EntryCard from "../components/EntryCard";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
@@ -8,6 +9,22 @@ import { entries } from "../data/mockData";
 
 
 export default function HomeScreen() {
+  const router = useRouter();
+
+  const handleEntryPress = (entry) => {
+    router.push({
+      pathname: "/entry/[id]",
+      params: {
+        id: entry.id,
+        title: entry.title,
+        note: entry.note,
+        type: entry.type,
+        rating: String(entry.rating ?? ""),
+        date: entry.date,
+      },
+    });
+  };
+
   return (
     <View style={styles.container}>
       <Header />
@@ -21,7 +38,7 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <EntryCard
               entry={item}
-              onPress={() => console.log("Go to details", item.id)}
+              onPress={() => handleEntryPress(item)}
             />
           )}
         />

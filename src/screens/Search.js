@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
+import Header from "../components/Header";
 import Navbar from '../components/Navbar';
 
 export default function SearchScreen() {
@@ -7,6 +8,7 @@ export default function SearchScreen() {
 
   return (
     <View style={styles.container}>
+      <Header />
       <View style={styles.content}>
         <TextInput
           placeholder="Search..."
