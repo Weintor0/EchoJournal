@@ -1,5 +1,9 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FontSizes } from "../constants/typography";
+import TypeTag from "./TypeTag";
+
+const starIcon = require("../assets/icons/star.png");
+const calendarIcon = require("../assets/icons/calendar.png");
 
 export default function EntryCard({ entry, onPress }) {
   const safeEntry = entry ?? {};
@@ -18,11 +22,17 @@ export default function EntryCard({ entry, onPress }) {
         </Text>
 
         <View style={styles.footer}>
-          <Text style={styles.type}>{safeEntry.type ?? "-"}</Text>
-          <Text style={styles.rating}>
-            {safeEntry.rating != null ? `${safeEntry.rating}/10` : "-"}
-          </Text>
-          <Text style={styles.date}>{safeEntry.date ?? "-"}</Text>
+          <TypeTag type={safeEntry.type} />
+          <View style={styles.ratingRow}>
+            <Image source={starIcon} style={styles.ratingIcon} />
+            <Text style={styles.rating}>
+              {safeEntry.rating != null ? `${safeEntry.rating}/10` : "-"}
+            </Text>
+          </View>
+          <View style={styles.dateRow}>
+            <Image source={calendarIcon} style={styles.dateIcon} />
+            <Text style={styles.date}>{safeEntry.date ?? "-"}</Text>
+          </View>
         </View>
       </View>
 
@@ -70,15 +80,34 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-  type: {
-    fontSize: FontSizes.s,
+    alignItems: "center",
+    gap: 8,
   },
   rating: {
     fontSize: FontSizes.s,
   },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  ratingIcon: {
+    width: 14,
+    height: 14,
+    resizeMode: "contain",
+  },
   date: {
     fontSize: FontSizes.s,
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  dateIcon: {
+    width: 14,
+    height: 14,
+    resizeMode: "contain",
   },
   detailsSection: {
     width: "20%",

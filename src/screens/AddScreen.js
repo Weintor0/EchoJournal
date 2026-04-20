@@ -1,5 +1,7 @@
 import Header from '@/src/components/Header';
 import Navbar from '@/src/components/Navbar';
+import TypeTag from '@/src/components/TypeTag';
+import { ENTRY_TYPES } from '@/src/constants/entryTypes';
 import { FontSizes } from '@/src/constants/typography';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -17,7 +19,7 @@ import {
 export default function AddScreen() {
   const router = useRouter();
   const [title, setTitle] = useState('');
-  const [type, setType] = useState('');
+  const [type, setType] = useState('Other');
   const [rating, setRating] = useState('');
   const [date, setDate] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -66,7 +68,7 @@ export default function AddScreen() {
       params: {
         id: String(Date.now()),
         title: trimmedTitle,
-        type: type.trim() || '-',
+        type,
         rating: safeRating || '-',
         date: date.trim() || '-',
         imageUrl: imageUrl.trim(),
@@ -91,20 +93,37 @@ export default function AddScreen() {
           />
 
           <View style={styles.metaRow}>
-            <TextInput
-              value={type}
-              onChangeText={setType}
-              placeholder="Type (Movie, Series...)"
-              style={[styles.input, styles.metaInput]}
-            />
-            <TextInput
-              value={rating}
-              onChangeText={setRating}
-              placeholder="Rating (0-10)"
-              keyboardType="decimal-pad"
-              style={[styles.input, styles.metaInput]}
-            />
+            <View style={styles.metaInput}>
+              <Text style={styles.fieldLabel}>Type</Text>
+              <View style={styles.typeList}>
+                {ENTRY_TYPES.map((entryType) => {
+                  const isSelected = entryType.label === type;
+
+                  return (
+                    <Pressable
+                      key={entryType.label}
+                      onPress={() => setType(entryType.label)}
+                      style={[styles.typeOption, isSelected && styles.typeOptionSelected]}
+                    >
+                      <TypeTag
+                        type={entryType.label}
+                        style={styles.typeTag}
+                        textStyle={styles.typeTagText}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
           </View>
+
+          <TextInput
+            value={rating}
+            onChangeText={setRating}
+            placeholder="Rating (0-10)"
+            keyboardType="decimal-pad"
+            style={styles.input}
+          />
 
           <TextInput
             value={date}
@@ -181,12 +200,7 @@ const styles = StyleSheet.create({
   },
 
   metaRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-
-  metaInput: {
-    flex: 1,
+    marginBottom: 10,
   },
 
   fieldLabel: {
@@ -220,6 +234,30 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.s,
     color: '#555',
     marginBottom: 8,
+  },
+
+  typeList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+
+  typeOption: {
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+
+  typeOptionSelected: {
+    borderColor: '#5A6FB2',
+  },
+
+  typeTag: {
+    alignSelf: 'stretch',
+  },
+
+  typeTagText: {
+    fontSize: FontSizes.xs,
   },
 
   thoughts: {

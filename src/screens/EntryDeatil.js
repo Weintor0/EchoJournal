@@ -2,7 +2,10 @@ import { useLocalSearchParams } from 'expo-router';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import Header from '../components/Header';
 import Navbar from '../components/Navbar';
+import TypeTag from '../components/TypeTag';
 import { FontSizes } from '../constants/typography';
+
+const starIcon = require('../assets/icons/star.png');
 
 export default function EntryDetailScreen() {
   const params = useLocalSearchParams();
@@ -30,8 +33,15 @@ export default function EntryDetailScreen() {
               )}
             </View>
             <View style={styles.metaText}>
-              <Text style={styles.metaItem}>Type: {type}</Text>
-              <Text style={styles.metaItem}>Rate: {rating !== '-' ? `${rating}/10` : '-'}</Text>
+              <View style={styles.typeRow}>
+                <Text style={styles.metaItem}>Type:</Text>
+                <TypeTag type={type} />
+              </View>
+              <View style={styles.ratingRow}>
+                <Text style={styles.metaItem}>Rate:</Text>
+                <Image source={starIcon} style={styles.ratingIcon} />
+                <Text style={styles.metaItem}>{rating !== '-' ? `${rating}/10` : '-'}</Text>
+              </View>
               <Text style={styles.metaItem}>Date: {date}</Text>
             </View>
           </View>
@@ -83,6 +93,26 @@ const styles = StyleSheet.create({
   metaItem: { 
     fontSize: FontSizes.m, 
     marginBottom: 4 
+  },
+
+  typeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+
+  ratingIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: 'contain',
   },
 
   thoughts: { 
