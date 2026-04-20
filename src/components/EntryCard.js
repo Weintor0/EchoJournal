@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FontSizes } from "../constants/typography";
 
 export default function EntryCard({ entry, onPress }) {
   const safeEntry = entry ?? {};
@@ -35,7 +36,7 @@ export default function EntryCard({ entry, onPress }) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
-    backgroundColor: "#D9DCE3",
+    backgroundColor: "#cad2e4",
     padding: 10,
     borderRadius: 10,
     marginBottom: 12,
@@ -59,10 +60,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: FontSizes.m,
   },
   preview: {
-    fontSize: 14,
+    fontSize: FontSizes.s,
     color: "#333",
     marginVertical: 4,
   },
@@ -71,13 +72,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   type: {
-    fontSize: 14,
+    fontSize: FontSizes.s,
   },
   rating: {
-    fontSize: 14,
+    fontSize: FontSizes.s,
   },
   date: {
-    fontSize: 14,
+    fontSize: FontSizes.s,
   },
   detailsSection: {
     width: "20%",
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
     paddingLeft: 6,
   },
   details: {
-    fontSize: 10,
+    fontSize: FontSizes.xs,
     textAlign: "right",
   },
 });

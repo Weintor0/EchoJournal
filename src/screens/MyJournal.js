@@ -4,6 +4,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import EntryCard from '../components/EntryCard';
 import Header from "../components/Header";
 import Navbar from '../components/Navbar';
+import { FontSizes } from '../constants/typography';
 
 
 const dummyData = [
@@ -69,7 +70,19 @@ export default function MyJournalScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#E6E6E6' },
-  content: { flex: 1, padding: 16 },
-  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#E6E6E6' 
+  },
+
+  content: { 
+    flex: 1, 
+    padding: 16 
+  },
+
+  header: { 
+    fontSize: FontSizes.xxl, 
+    fontWeight: '600',
+    marginBottom: 10 
+  },
 });

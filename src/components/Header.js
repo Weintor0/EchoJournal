@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
+import { FontSizes } from "../constants/typography";
 
 export default function Header() {
   return (
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "black",
-    fontSize: 18,
+    fontSize: FontSizes.xxxl,
     fontWeight: "600",
   },
 });
