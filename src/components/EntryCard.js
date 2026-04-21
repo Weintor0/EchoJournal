@@ -4,13 +4,16 @@ import TypeTag from "./TypeTag";
 
 const starIcon = require("../assets/icons/star.png");
 const calendarIcon = require("../assets/icons/calendar.png");
+const deleteIcon = require("../assets/icons/delete.png");
 
-export default function EntryCard({ entry, onPress }) {
+export default function EntryCard({ entry, onPress, onDelete }) {
   const safeEntry = entry ?? {};
   const imageUrl =
-    typeof safeEntry.imageUrl === "string" && safeEntry.imageUrl.trim()
-      ? safeEntry.imageUrl
-      : "";
+  typeof safeEntry.image === "string" && safeEntry.image.trim()
+    ? safeEntry.image
+    : typeof safeEntry.imageUrl === "string"
+    ? safeEntry.imageUrl
+    : "";
   const ratingText =
     safeEntry.rating != null && String(safeEntry.rating).trim()
       ? `${safeEntry.rating}/10`
@@ -47,6 +50,9 @@ export default function EntryCard({ entry, onPress }) {
       </View>
 
       <View style={styles.detailsSection}>
+        <TouchableOpacity onPress={() => onDelete(entry)}>
+          <Image source={deleteIcon} style={styles.deleteIcon} />
+        </TouchableOpacity>
         <Text style={styles.details}>{"Details ->"}</Text>
       </View>
     </TouchableOpacity>
@@ -106,6 +112,10 @@ const styles = StyleSheet.create({
     height: 14,
     resizeMode: "contain",
   },
+  deleteIcon: {
+    width: 16,
+    height: 16,
+  },
   date: {
     fontSize: FontSizes.s,
   },
@@ -121,7 +131,7 @@ const styles = StyleSheet.create({
   },
   detailsSection: {
     width: "20%",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "flex-end",
     paddingLeft: 6,
   },

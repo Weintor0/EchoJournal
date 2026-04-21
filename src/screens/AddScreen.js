@@ -1,6 +1,6 @@
+import { createEntry } from '@/src/api/entries';
 import Header from '@/src/components/Header';
 import Navbar from '@/src/components/Navbar';
-import { createEntry } from '@/src/api/entries';
 import TypeTag from '@/src/components/TypeTag';
 import { ENTRY_TYPES } from '@/src/constants/entryTypes';
 import { FontSizes } from '@/src/constants/typography';
