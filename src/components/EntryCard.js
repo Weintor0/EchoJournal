@@ -7,11 +7,23 @@ const calendarIcon = require("../assets/icons/calendar.png");
 
 export default function EntryCard({ entry, onPress }) {
   const safeEntry = entry ?? {};
+  const imageUrl =
+    typeof safeEntry.imageUrl === "string" && safeEntry.imageUrl.trim()
+      ? safeEntry.imageUrl
+      : "";
+  const ratingText =
+    safeEntry.rating != null && String(safeEntry.rating).trim()
+      ? `${safeEntry.rating}/10`
+      : "-";
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.imageSection}>
-        <View style={styles.image} />
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.image} />
+        ) : (
+          <View style={styles.image} />
+        )}
       </View>
 
       <View style={styles.infoSection}>
@@ -25,9 +37,7 @@ export default function EntryCard({ entry, onPress }) {
           <TypeTag type={safeEntry.type} />
           <View style={styles.ratingRow}>
             <Image source={starIcon} style={styles.ratingIcon} />
-            <Text style={styles.rating}>
-              {safeEntry.rating != null ? `${safeEntry.rating}/10` : "-"}
-            </Text>
+            <Text style={styles.rating}>{ratingText}</Text>
           </View>
           <View style={styles.dateRow}>
             <Image source={calendarIcon} style={styles.dateIcon} />

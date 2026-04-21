@@ -1,5 +1,6 @@
 import Header from '@/src/components/Header';
 import Navbar from '@/src/components/Navbar';
+import { createEntry } from '@/src/api/entries';
 import TypeTag from '@/src/components/TypeTag';
 import { ENTRY_TYPES } from '@/src/constants/entryTypes';
 import { FontSizes } from '@/src/constants/typography';
@@ -25,6 +26,7 @@ export default function AddScreen() {
   const [imageUrl, setImageUrl] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -50,7 +52,7 @@ export default function AddScreen() {
     }
   };
 
-  const handleCreateEntry = () => {
+  const handleCreateEntry = async () => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setError('Title is required.');
@@ -62,19 +64,30 @@ export default function AddScreen() {
       ? ''
       : String(Math.max(0, Math.min(10, numericRating)));
 
-    setError('');
-    router.push({
-      pathname: '/entry/[id]',
-      params: {
-        id: String(Date.now()),
+    try {
+      setIsSubmitting(true);
+      setError('');
+
+      const createdEntry = await createEntry({
         title: trimmedTitle,
         type,
-        rating: safeRating || '-',
-        date: date.trim() || '-',
+        rating: safeRating,
+        date: date.trim(),
         imageUrl: imageUrl.trim(),
-        note: note.trim() || 'No notes yet.',
-      },
-    });
+        note: note.trim(),
+      });
+
+      router.replace({
+        pathname: '/entry/[id]',
+        params: {
+          id: String(createdEntry.id),
+        },
+      });
+    } catch (createError) {
+      setError(createError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -157,8 +170,14 @@ export default function AddScreen() {
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <Pressable style={styles.button} onPress={handleCreateEntry}>
-          <Text style={styles.buttonText}>Create Entry</Text>
+        <Pressable
+          style={[styles.button, isSubmitting && styles.buttonDisabled]}
+          onPress={handleCreateEntry}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.buttonText}>
+            {isSubmitting ? 'Creating...' : 'Create Entry'}
+          </Text>
         </Pressable>
       </ScrollView>
 
@@ -267,7 +286,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: FontSizes.marginLeft,
+    fontSize: FontSizes.l,
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -299,6 +318,10 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: FontSizes.xl,
     fontWeight: '600',
+  },
+
+  buttonDisabled: {
+    opacity: 0.7,
   },
 });
 

@@ -1,0 +1,66 @@
+import Constants from "expo-constants";
+import { Platform } from "react-native";
+
+function getApiBaseUrl() {
+  const configuredBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
+  if (typeof configuredBaseUrl === "string" && configuredBaseUrl.trim()) {
+    return configuredBaseUrl.replace(/\/$/, "");
+  }
+
+  const hostUri =
+    Constants.expoConfig?.hostUri ??
+    Constants.expoGoConfig?.debuggerHost ??
+    Constants.manifest2?.extra?.expoClient?.hostUri;
+
+  const host = typeof hostUri === "string" ? hostUri.split(":")[0] : "";
+  if (host) {
+    return `http://${host}:3000`;
+  }
+
+  if (Platform.OS === "android") {
+    return "http://10.0.2.2:3000";
+  }
+
+  return "http://localhost:3000";
+}
+
+const API_BASE_URL = getApiBaseUrl();
+
+async function request(path, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers ?? {}),
+    },
+    ...options,
+  });
+
+  const contentType = response.headers.get("content-type") ?? "";
+  const body = contentType.includes("application/json")
+    ? await response.json()
+    : null;
+
+  if (!response.ok) {
+    throw new Error(body?.error ?? "Request failed.");
+  }
+
+  return body;
+}
+
+export function getEntries({ limit } = {}) {
+  const query = typeof limit === "number" ? `?limit=${limit}` : "";
+  return request(`/entries${query}`);
+}
+
+export function getEntryById(id) {
+  return request(`/entries/${id}`);
+}
+
+export function createEntry(entry) {
+  return request("/entries", {
+    method: "POST",
+    body: JSON.stringify(entry),
+  });
+}
+
+export { API_BASE_URL };
