@@ -94,13 +94,15 @@ export default function HomeScreen() {
 
   const handleDeleteEntry = async (id) => {
     try {
-      await fetch(`http://10.0.2.2:3000/entries/${id}`, {
+      const res = await fetch(`http://localhost:3000/entries/${id}`, {
         method: "DELETE",
       });
 
-      // refresh from DB
-      const data = await getEntries();
-      setEntries(data);
+      const data = await res.json();
+
+      // Refresh entries from backend
+      const updated = await getEntries();
+      setEntries(updated);
     } catch (err) {
       console.log("Delete error:", err);
     }

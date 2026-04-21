@@ -17,6 +17,7 @@ import {
   View,
 } from 'react-native';
 
+
 export default function AddScreen() {
   const router = useRouter();
   const [title, setTitle] = useState('');
@@ -30,36 +31,36 @@ export default function AddScreen() {
 
   const handlePickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
     if (!permission.granted) {
       setError('Media library permission is required to upload an image.');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ safest for most Expo SDKs
       allowsEditing: true,
       quality: 0.8,
     });
 
-    if (result.canceled) {
-      return;
-    }
+    if (result.canceled) return;
 
-    const selectedImageUri = result.assets?.[0]?.uri;
-    if (selectedImageUri) {
-      setImageUrl(selectedImageUri);
-      setError('');
-    }
+    const uri = result.assets?.[0]?.uri;
+
+    if (!uri) return;
+
+    setImageUrl(uri);
+    setError('');
   };
-
   const handleCreateEntry = async () => {
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) {
-      setError('Title is required.');
-      return;
-    }
+  const trimmedTitle = title.trim();
 
-    const numericRating = Number.parseFloat(rating);
+  if (!trimmedTitle) {
+    setError('Title is required.');
+    return;
+  }
+
+  const numericRating = Number.parseFloat(rating);
     const safeRating = Number.isNaN(numericRating)
       ? ''
       : String(Math.max(0, Math.min(10, numericRating)));
@@ -73,7 +74,7 @@ export default function AddScreen() {
         type,
         rating: safeRating,
         date: date.trim(),
-        imageUrl: imageUrl.trim(),
+        imageUrl: imageUrl || '', 
         note: note.trim(),
       });
 
@@ -83,13 +84,12 @@ export default function AddScreen() {
           id: String(createdEntry.id),
         },
       });
-    } catch (createError) {
-      setError(createError.message);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   return (
     <View style={styles.container}>
       <Header />

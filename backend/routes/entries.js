@@ -63,16 +63,17 @@ router.post("/", (req, res) => {
 });
 
 router.delete("/:id", (req, res) => {
-  db.run("DELETE FROM entries WHERE id = ?", [req.params.id], function (err) {
+  const id = req.params.id;
+
+  console.log("Deleting from DB:", id); // DEBUG
+
+  db.run("DELETE FROM entries WHERE id = ?", [id], function (err) {
     if (err) {
-      return res.status(500).json({ error: "Failed to delete entry." });
+      console.log(err);
+      return res.status(500).json({ error: "Delete failed" });
     }
 
-    if (this.changes === 0) {
-      return res.status(404).json({ error: "Entry not found." });
-    }
-
-    res.json({ success: true });
+    res.json({ success: true, deleted: this.changes });
   });
 });
 
