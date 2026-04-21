@@ -1,30 +1,133 @@
 // src/screens/HomeScreen.js
 import { useRouter } from "expo-router";
-import React from "react";
+import { useIsFocused } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import { getEntries } from "../api/entries";
 import EntryCard from "../components/EntryCard";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import { FontSizes } from "../constants/typography";
-import { entries } from "../data/mockData";
 
+function getMostUsedType(entries) {
+  if (entries.length === 0) {
+    return "-";
+  }
+
+  const counts = entries.reduce((map, entry) => {
+    const key = entry.type?.trim() || "Other";
+    map[key] = (map[key] ?? 0) + 1;
+    return map;
+  }, {});
+
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function getEntriesThisWeek(entries) {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(now.getDate() - 7);
+
+  return entries.filter((entry) => {
+    if (!entry.createdAt) {
+      return false;
+    }
+
+    const createdAt = new Date(entry.createdAt);
+    return !Number.isNaN(createdAt.getTime()) && createdAt >= sevenDaysAgo;
+  }).length;
+}
+
+function getStreak(entries) {
+  const uniqueDayKeys = [
+    ...new Set(
+      entries
+        .map((entry) => entry.createdAt)
+        .filter(Boolean)
+        .map((createdAt) => {
+          const date = new Date(createdAt);
+          return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+        })
+        .filter(Boolean)
+    ),
+  ].sort().reverse();
+
+  if (uniqueDayKeys.length === 0) {
+    return 0;
+  }
+
+  let streak = 0;
+  const cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+
+  if (uniqueDayKeys[0] !== cursor.toISOString().slice(0, 10)) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  for (const dayKey of uniqueDayKeys) {
+    if (dayKey !== cursor.toISOString().slice(0, 10)) {
+      break;
+    }
+
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+}
 
 export default function HomeScreen() {
   const router = useRouter();
+  const isFocused = useIsFocused();
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const handleEntryPress = (entry) => {
     router.push({
       pathname: "/entry/[id]",
       params: {
         id: entry.id,
-        title: entry.title,
-        note: entry.note,
-        type: entry.type,
-        rating: String(entry.rating ?? ""),
-        date: entry.date,
       },
     });
   };
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadEntries() {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await getEntries();
+
+        if (isActive) {
+          setEntries(data);
+        }
+      } catch (loadError) {
+        if (isActive) {
+          setError(loadError.message);
+        }
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    }
+
+    if (isFocused) {
+      loadEntries();
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [isFocused]);
+
+  const recentEntries = entries.slice(0, 5);
+  const mostUsedType = getMostUsedType(entries);
+  const entriesThisWeek = getEntriesThisWeek(entries);
+  const streak = getStreak(entries);
 
   return (
     <View style={styles.container}>
@@ -34,16 +137,21 @@ export default function HomeScreen() {
         <View style={styles.recent}>
           <Text style={styles.sectionTitle}>Recent Entries</Text>
 
-          <FlatList
-            data={entries}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <EntryCard
-                entry={item}
-                onPress={() => handleEntryPress(item)}
-              />
-            )}
-          />
+          {loading ? <Text>Loading recent entries...</Text> : null}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {!loading && !error ? (
+            <FlatList
+              data={recentEntries}
+              keyExtractor={(item) => String(item.id)}
+              ListEmptyComponent={<Text>No entries yet.</Text>}
+              renderItem={({ item }) => (
+                <EntryCard
+                  entry={item}
+                  onPress={() => handleEntryPress(item)}
+                />
+              )}
+            />
+          ) : null}
         </View>
 
         <View style={styles.stats}>
@@ -51,17 +159,17 @@ export default function HomeScreen() {
 
           <View style={styles.statsRow}>
             <Text>Most Used Type</Text>
-            <Text>Movie</Text>
+            <Text>{mostUsedType}</Text>
           </View>
 
           <View style={styles.statsRow}>
             <Text>Entries This Week</Text>
-            <Text>15</Text>
+            <Text>{entriesThisWeek}</Text>
           </View>
 
           <View style={styles.statsRow}>
             <Text>Streak</Text>
-            <Text>5 Days</Text>
+            <Text>{streak} Days</Text>
           </View>
         </View>
       </View>
@@ -105,6 +213,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 5,
+  },
+
+  errorText: {
+    color: "#B00020",
+    marginBottom: 10,
   },
 });
 
