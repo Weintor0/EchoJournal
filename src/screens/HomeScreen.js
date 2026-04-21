@@ -1,6 +1,6 @@
 // src/screens/HomeScreen.js
-import { useRouter } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { getEntries } from "../api/entries";
@@ -92,6 +92,20 @@ export default function HomeScreen() {
     });
   };
 
+  const handleDeleteEntry = async (id) => {
+    try {
+      await fetch(`http://10.0.2.2:3000/entries/${id}`, {
+        method: "DELETE",
+      });
+
+      // refresh from DB
+      const data = await getEntries();
+      setEntries(data);
+    } catch (err) {
+      console.log("Delete error:", err);
+    }
+  };
+
   useEffect(() => {
     let isActive = true;
 
@@ -148,6 +162,7 @@ export default function HomeScreen() {
                 <EntryCard
                   entry={item}
                   onPress={() => handleEntryPress(item)}
+                  onDelete={() => handleDeleteEntry(item.id)}
                 />
               )}
             />
