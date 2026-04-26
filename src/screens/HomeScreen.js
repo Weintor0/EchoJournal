@@ -1,80 +1,13 @@
-// src/screens/HomeScreen.js
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { deleteEntry, getEntries } from "../api/entries";
 import EntryCard from "../components/EntryCard";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import { FontSizes } from "../constants/typography";
-
-function getMostUsedType(entries) {
-  if (entries.length === 0) {
-    return "-";
-  }
-
-  const counts = entries.reduce((map, entry) => {
-    const key = entry.type?.trim() || "Other";
-    map[key] = (map[key] ?? 0) + 1;
-    return map;
-  }, {});
-
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-}
-
-function getEntriesThisWeek(entries) {
-  const now = new Date();
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(now.getDate() - 7);
-
-  return entries.filter((entry) => {
-    if (!entry.createdAt) {
-      return false;
-    }
-
-    const createdAt = new Date(entry.createdAt);
-    return !Number.isNaN(createdAt.getTime()) && createdAt >= sevenDaysAgo;
-  }).length;
-}
-
-function getStreak(entries) {
-  const uniqueDayKeys = [
-    ...new Set(
-      entries
-        .map((entry) => entry.createdAt)
-        .filter(Boolean)
-        .map((createdAt) => {
-          const date = new Date(createdAt);
-          return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
-        })
-        .filter(Boolean)
-    ),
-  ].sort().reverse();
-
-  if (uniqueDayKeys.length === 0) {
-    return 0;
-  }
-
-  let streak = 0;
-  const cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-
-  if (uniqueDayKeys[0] !== cursor.toISOString().slice(0, 10)) {
-    cursor.setDate(cursor.getDate() - 1);
-  }
-
-  for (const dayKey of uniqueDayKeys) {
-    if (dayKey !== cursor.toISOString().slice(0, 10)) {
-      break;
-    }
-
-    streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-
-  return streak;
-}
+import { getEntryStats } from "../utils/entryStats";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -135,9 +68,7 @@ export default function HomeScreen() {
   }, [isFocused]);
 
   const recentEntries = entries.slice(0, 5);
-  const mostUsedType = getMostUsedType(entries);
-  const entriesThisWeek = getEntriesThisWeek(entries);
-  const streak = getStreak(entries);
+  const stats = getEntryStats(entries);
 
   return (
     <View style={styles.container}>
@@ -154,6 +85,7 @@ export default function HomeScreen() {
               data={recentEntries}
               keyExtractor={(item) => String(item.id)}
               ListEmptyComponent={<Text>No entries yet.</Text>}
+              scrollEnabled={false}
               renderItem={({ item }) => (
                 <EntryCard
                   entry={item}
@@ -165,24 +97,24 @@ export default function HomeScreen() {
           ) : null}
         </View>
 
-        <View style={styles.stats}>
+        <TouchableOpacity style={styles.stats} onPress={() => router.replace("/profile")}>
           <Text style={styles.sectionTitle}>My Stats</Text>
 
           <View style={styles.statsRow}>
             <Text>Most Used Type</Text>
-            <Text>{mostUsedType}</Text>
+            <Text style={styles.statValue}>{stats.mostUsedType}</Text>
           </View>
 
           <View style={styles.statsRow}>
             <Text>Entries This Week</Text>
-            <Text>{entriesThisWeek}</Text>
+            <Text style={styles.statValue}>{stats.entriesThisWeek}</Text>
           </View>
 
           <View style={styles.statsRow}>
             <Text>Streak</Text>
-            <Text>{streak} Days</Text>
+            <Text style={styles.statValue}>{stats.currentStreak} Days</Text>
           </View>
-        </View>
+        </TouchableOpacity>
       </ScrollView>
 
       <Navbar />
@@ -218,16 +150,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9DCE3',  
     borderRadius: 10,
     padding: 4,
+    
   },
 
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 5,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#B9BFCC',
   },
 
   errorText: {
     color: "#B00020",
     marginBottom: 10,
+  },
+
+    statValue: {  
+    fontWeight: "600",
   },
 });
