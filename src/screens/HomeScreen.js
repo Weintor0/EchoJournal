@@ -2,8 +2,8 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
-import { getEntries } from "../api/entries";
+import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { deleteEntry, getEntries } from "../api/entries";
 import EntryCard from "../components/EntryCard";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
@@ -94,13 +94,7 @@ export default function HomeScreen() {
 
   const handleDeleteEntry = async (id) => {
     try {
-      const res = await fetch(`http://localhost:3000/entries/${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-
-      // Refresh entries from backend
+      await deleteEntry(id);
       const updated = await getEntries();
       setEntries(updated);
     } catch (err) {
@@ -149,7 +143,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Header />
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.recent}>
           <Text style={styles.sectionTitle}>Recent Entries</Text>
 
@@ -189,7 +183,7 @@ export default function HomeScreen() {
             <Text>{streak} Days</Text>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <Navbar />
     </View>
@@ -237,4 +231,3 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
-
