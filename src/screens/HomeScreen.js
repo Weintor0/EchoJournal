@@ -75,7 +75,7 @@ export default function HomeScreen() {
       <Header />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.recent}>
+        <TouchableOpacity style={styles.recent} onPress={() => router.replace("/journal")}>
           <Text style={styles.sectionTitle}>Recent Entries</Text>
 
           {loading ? <Text>Loading recent entries...</Text> : null}
@@ -95,7 +95,7 @@ export default function HomeScreen() {
               )}
             />
           ) : null}
-        </View>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.stats} onPress={() => router.replace("/profile")}>
           <Text style={styles.sectionTitle}>My Stats</Text>
