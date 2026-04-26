@@ -2,7 +2,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { getEntries } from '../api/entries';
+import { deleteEntry, getEntries } from '../api/entries';
 import EntryCard from '../components/EntryCard';
 import Header from "../components/Header";
 import Navbar from '../components/Navbar';
@@ -22,6 +22,16 @@ export default function MyJournalScreen() {
         id: entry.id,
       },
     });
+  };
+
+  const handleDeleteEntry = async (id) => {
+    try {
+      await deleteEntry(id);
+      const updatedEntries = await getEntries();
+      setEntries(updatedEntries);
+    } catch (deleteError) {
+      setError(deleteError.message);
+    }
   };
 
   useEffect(() => {
@@ -69,7 +79,11 @@ export default function MyJournalScreen() {
             keyExtractor={(item) => String(item.id)}
             ListEmptyComponent={<Text>No entries yet.</Text>}
             renderItem={({ item }) => (
-              <EntryCard entry={item} onPress={() => handleEntryPress(item)} />
+              <EntryCard
+                entry={item}
+                onPress={() => handleEntryPress(item)}
+                onDelete={() => handleDeleteEntry(item.id)}
+              />
             )}
           />
         ) : null}

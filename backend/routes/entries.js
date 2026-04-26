@@ -62,15 +62,49 @@ router.post("/", (req, res) => {
   );
 });
 
+router.put("/:id", (req, res) => {
+  const { title, note, type, rating, date, imageUrl } = req.body;
+  const { id } = req.params;
+
+  if (!title || !String(title).trim()) {
+    return res.status(400).json({ error: "Title is required." });
+  }
+
+  db.run(
+    `UPDATE entries
+     SET title = ?, note = ?, type = ?, rating = ?, date = ?, imageUrl = ?
+     WHERE id = ?`,
+    [title, note, type, rating, date, imageUrl, id],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: "Failed to update entry." });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ error: "Entry not found." });
+      }
+
+      db.get("SELECT * FROM entries WHERE id = ?", [id], (selectErr, row) => {
+        if (selectErr) {
+          return res.status(500).json({ error: "Entry updated but could not be loaded." });
+        }
+
+        res.json(row);
+      });
+    }
+  );
+});
+
 router.delete("/:id", (req, res) => {
   const id = req.params.id;
 
-  console.log("Deleting from DB:", id); // DEBUG
-
   db.run("DELETE FROM entries WHERE id = ?", [id], function (err) {
     if (err) {
-      console.log(err);
       return res.status(500).json({ error: "Delete failed" });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "Entry not found." });
     }
 
     res.json({ success: true, deleted: this.changes });

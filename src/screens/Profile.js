@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import profileIcon from "../assets/icons/profile.png";
 import Header from "../components/Header";
 import Navbar from '../components/Navbar';
@@ -10,7 +10,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <Header />
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Image source={profileIcon} style={styles.icon} />
         <Text style={styles.title}>User Name</Text>
         <Text style={styles.logout}>Log Out</Text>
@@ -23,7 +23,7 @@ export default function ProfileScreen() {
             </View>
           ))}
         </View>
-      </View>
+      </ScrollView>
       <Navbar />
     </View>
   );
@@ -35,7 +35,8 @@ const styles = StyleSheet.create({
   },
   
   content: { 
-    flex: 1, padding: 16 
+    padding: 16,
+    paddingBottom: 24,
   },
 
   icon: {

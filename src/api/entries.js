@@ -38,10 +38,14 @@ async function request(path, options = {}) {
   const contentType = response.headers.get("content-type") ?? "";
   const body = contentType.includes("application/json")
     ? await response.json()
-    : null;
+    : await response.text();
 
   if (!response.ok) {
-    throw new Error(body?.error ?? "Request failed.");
+    const fallbackMessage =
+      typeof body === "string" && body.trim() ? body.trim() : "Request failed.";
+    throw new Error(
+      typeof body === "object" && body !== null ? body.error ?? "Request failed." : fallbackMessage
+    );
   }
 
   return body;
@@ -60,6 +64,19 @@ export function createEntry(entry) {
   return request("/entries", {
     method: "POST",
     body: JSON.stringify(entry),
+  });
+}
+
+export function updateEntry(id, entry) {
+  return request(`/entries/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(entry),
+  });
+}
+
+export function deleteEntry(id) {
+  return request(`/entries/${id}`, {
+    method: "DELETE",
   });
 }
 
