@@ -1,70 +1,121 @@
-// src/screens/HomeScreen.js
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { deleteEntry, getEntries } from "../api/entries";
 import EntryCard from "../components/EntryCard";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import { FontSizes } from "../constants/typography";
-import { entries } from "../data/mockData";
-
+import { getEntryStats } from "../utils/entryStats";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const isFocused = useIsFocused();
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const handleEntryPress = (entry) => {
     router.push({
       pathname: "/entry/[id]",
       params: {
         id: entry.id,
-        title: entry.title,
-        note: entry.note,
-        type: entry.type,
-        rating: String(entry.rating ?? ""),
-        date: entry.date,
       },
     });
   };
+
+  const handleDeleteEntry = async (id) => {
+    try {
+      await deleteEntry(id);
+      const updated = await getEntries();
+      setEntries(updated);
+    } catch (err) {
+      console.log("Delete error:", err);
+    }
+  };
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadEntries() {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await getEntries();
+
+        if (isActive) {
+          setEntries(data);
+        }
+      } catch (loadError) {
+        if (isActive) {
+          setError(loadError.message);
+        }
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    }
+
+    if (isFocused) {
+      loadEntries();
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [isFocused]);
+
+  const recentEntries = entries.slice(0, 5);
+  const stats = getEntryStats(entries);
 
   return (
     <View style={styles.container}>
       <Header />
 
-      <View style={styles.content}>
-        <View style={styles.recent}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <TouchableOpacity style={styles.recent} onPress={() => router.replace("/journal")}>
           <Text style={styles.sectionTitle}>Recent Entries</Text>
 
-          <FlatList
-            data={entries}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <EntryCard
-                entry={item}
-                onPress={() => handleEntryPress(item)}
-              />
-            )}
-          />
-        </View>
+          {loading ? <Text>Loading recent entries...</Text> : null}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {!loading && !error ? (
+            <FlatList
+              data={recentEntries}
+              keyExtractor={(item) => String(item.id)}
+              ListEmptyComponent={<Text>No entries yet.</Text>}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <EntryCard
+                  entry={item}
+                  onPress={() => handleEntryPress(item)}
+                  onDelete={() => handleDeleteEntry(item.id)}
+                />
+              )}
+            />
+          ) : null}
+        </TouchableOpacity>
 
-        <View style={styles.stats}>
+        <TouchableOpacity style={styles.stats} onPress={() => router.replace("/profile")}>
           <Text style={styles.sectionTitle}>My Stats</Text>
 
           <View style={styles.statsRow}>
             <Text>Most Used Type</Text>
-            <Text>Movie</Text>
+            <Text style={styles.statValue}>{stats.mostUsedType}</Text>
           </View>
 
           <View style={styles.statsRow}>
             <Text>Entries This Week</Text>
-            <Text>15</Text>
+            <Text style={styles.statValue}>{stats.entriesThisWeek}</Text>
           </View>
 
           <View style={styles.statsRow}>
             <Text>Streak</Text>
-            <Text>5 Days</Text>
+            <Text style={styles.statValue}>{stats.currentStreak} Days</Text>
           </View>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </ScrollView>
 
       <Navbar />
     </View>
@@ -99,12 +150,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9DCE3',  
     borderRadius: 10,
     padding: 4,
+    
   },
 
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 5,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#B9BFCC',
+  },
+
+  errorText: {
+    color: "#B00020",
+    marginBottom: 10,
+  },
+
+    statValue: {  
+    fontWeight: "600",
   },
 });
-

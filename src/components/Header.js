@@ -1,10 +1,16 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FontSizes } from "../constants/typography";
 
+
 export default function Header() {
+  const router = useRouter();
+  
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Personal Media Journal</Text>
+      <TouchableOpacity onPress={() => router.replace("/")}>
+        <Text style={styles.title}>Personal Media Journal</Text>
+      </TouchableOpacity>
     </View>
   );
 }
