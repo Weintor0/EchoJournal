@@ -1,4 +1,3 @@
-// src/components/Navbar.js
 import { usePathname, useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
