@@ -1,9 +1,12 @@
 import { useIsFocused } from '@react-navigation/native';
-import * as FileSystem from 'expo-file-system/legacy';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { getCurrentUser, logoutUser, updateProfilePicture } from '../api/auth';
 import { getEntries } from '../api/entries';
+import editIcon from "../assets/icons/edit.png";
 import profileIcon from "../assets/icons/profile.png";
 import Header from "../components/Header";
 import Navbar from '../components/Navbar';
@@ -23,17 +26,15 @@ const PROFILE_STATS = [
   { label: 'Highest Rated Category', key: 'highestRatedCategory' },
 ];
 
-const PROFILE_PICTURE_URI = FileSystem.documentDirectory
-  ? `${FileSystem.documentDirectory}profile-picture.jpg`
-  : '';
+const PROFILE_IMAGE_SIZE = 500;
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const isFocused = useIsFocused();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [profilePictureUri, setProfilePictureUri] = useState('');
-  const [profilePictureVersion, setProfilePictureVersion] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
   const [profilePictureError, setProfilePictureError] = useState('');
 
   useEffect(() => {
@@ -71,25 +72,22 @@ export default function ProfileScreen() {
   useEffect(() => {
     let isActive = true;
 
-    async function loadProfilePicture() {
-      if (!PROFILE_PICTURE_URI) return;
-
+    async function loadCurrentUser() {
       try {
-        const profilePictureInfo = await FileSystem.getInfoAsync(PROFILE_PICTURE_URI);
+        const user = await getCurrentUser();
 
-        if (isActive && profilePictureInfo.exists) {
-          setProfilePictureUri(PROFILE_PICTURE_URI);
-          setProfilePictureVersion(Date.now());
+        if (isActive) {
+          setCurrentUser(user);
         }
       } catch {
         if (isActive) {
-          setProfilePictureUri('');
+          setCurrentUser(null);
         }
       }
     }
 
     if (isFocused) {
-      loadProfilePicture();
+      loadCurrentUser();
     }
 
     return () => {
@@ -100,6 +98,11 @@ export default function ProfileScreen() {
   async function handlePickProfilePicture() {
     try {
       setProfilePictureError('');
+
+      if (!currentUser?.id) {
+        setProfilePictureError('Please log in before adding a profile picture.');
+        return;
+      }
 
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -124,46 +127,61 @@ export default function ProfileScreen() {
         return;
       }
 
-      if (!PROFILE_PICTURE_URI) {
-        setProfilePictureUri(selectedAsset.uri);
+      const processedImage = await manipulateAsync(
+        selectedAsset.uri,
+        [{ resize: { width: PROFILE_IMAGE_SIZE } }],
+        {
+          base64: true,
+          compress: 0.75,
+          format: SaveFormat.JPEG,
+        }
+      );
+
+      if (!processedImage.base64) {
+        setProfilePictureError('The selected profile picture could not be processed.');
         return;
       }
 
-      await FileSystem.deleteAsync(PROFILE_PICTURE_URI, { idempotent: true });
-      await FileSystem.copyAsync({
-        from: selectedAsset.uri,
-        to: PROFILE_PICTURE_URI,
-      });
-
-      setProfilePictureUri(PROFILE_PICTURE_URI);
-      setProfilePictureVersion(Date.now());
+      const updatedUser = await updateProfilePicture(
+        currentUser.id,
+        `data:image/jpeg;base64,${processedImage.base64}`
+      );
+      setCurrentUser(updatedUser);
     } catch {
       setProfilePictureError('The selected profile picture could not be saved.');
     }
   }
 
+  async function handleLogout() {
+    await logoutUser();
+    router.replace('/login');
+  }
+
   const stats = getEntryStats(entries);
-  const hasProfilePicture = Boolean(profilePictureUri);
+  const profilePicture = currentUser?.profilePicture ?? '';
+  const hasProfilePicture = Boolean(profilePicture);
+  const displayName = currentUser
+    ? `${currentUser.name} ${currentUser.surname}`.trim()
+    : 'User Name';
 
   return (
     <View style={styles.container}>
       <Header />
       <ScrollView contentContainerStyle={styles.content}>
-        <Image
-          key={`${profilePictureUri}-${profilePictureVersion}`}
-          source={hasProfilePicture ? { uri: profilePictureUri } : profileIcon}
-          style={styles.icon}
-        />
-        <Pressable style={styles.profilePictureButton} onPress={handlePickProfilePicture}>
-          <Text style={styles.profilePictureButtonText}>
-            {hasProfilePicture ? 'Change Profile Picture' : 'Add Profile Picture'}
-          </Text>
+        <Pressable style={styles.profilePictureControl} onPress={handlePickProfilePicture}>
+          <Image
+            source={hasProfilePicture ? { uri: profilePicture } : profileIcon}
+            style={styles.icon}
+          />
+          <Image source={editIcon} style={styles.editIcon} />
         </Pressable>
         {profilePictureError ? (
           <Text style={styles.profilePictureError}>{profilePictureError}</Text>
         ) : null}
-        <Text style={styles.title}>User Name</Text>
-        <Text style={styles.logout}>Log Out</Text>
+        <Text style={styles.title}>{displayName}</Text>
+        <Pressable onPress={handleLogout}>
+          <Text style={styles.logout}>Log Out</Text>
+        </Pressable>
 
         <View style={styles.statsContainer}>
           <Text style={styles.statsTitle}>Stats</Text>
@@ -196,22 +214,27 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 
-  icon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  profilePictureControl: {
     alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
     marginBottom: 12,
-    marginTop: 20
   },
 
-  profilePictureButton: {
-    alignSelf: 'center',
-    backgroundColor: '#5A6FB2',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginBottom: 10,
+  icon: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+  },
+
+  editIcon: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    width: 22,
+    height: 22,
+    resizeMode: 'contain',
   },
 
   profilePictureButtonText: {

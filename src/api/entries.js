@@ -26,7 +26,7 @@ function getApiBaseUrl() {
 
 const API_BASE_URL = getApiBaseUrl();
 
-async function request(path, options = {}) {
+export async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
