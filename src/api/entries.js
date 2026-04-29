@@ -25,15 +25,32 @@ function getApiBaseUrl() {
 }
 
 const API_BASE_URL = getApiBaseUrl();
+const REQUEST_TIMEOUT_MS = 10000;
 
 export async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
-    ...options,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers ?? {}),
+      },
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error(`Backend did not respond at ${API_BASE_URL}.`);
+    }
+
+    throw new Error(`Could not reach backend at ${API_BASE_URL}.`);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   const contentType = response.headers.get("content-type") ?? "";
   const body = contentType.includes("application/json")

@@ -2,6 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { getCurrentUser } from "../api/auth";
 import { deleteEntry, getEntries } from "../api/entries";
 import EntryCard from "../components/EntryCard";
 import Header from "../components/Header";
@@ -15,6 +16,7 @@ export default function HomeScreen() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
 
   const handleEntryPress = (entry) => {
     router.push({
@@ -42,10 +44,11 @@ export default function HomeScreen() {
       try {
         setLoading(true);
         setError("");
-        const data = await getEntries();
+        const [data, user] = await Promise.all([getEntries(), getCurrentUser()]);
 
         if (isActive) {
           setEntries(data);
+          setCurrentUser(user);
         }
       } catch (loadError) {
         if (isActive) {
@@ -69,12 +72,15 @@ export default function HomeScreen() {
 
   const recentEntries = entries.slice(0, 5);
   const stats = getEntryStats(entries);
+  const displayName = currentUser?.name?.trim() || "there";
 
   return (
     <View style={styles.container}>
       <Header />
-
       <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.hello}>
+          <Text style={styles.helloText}>Hello, {displayName || "there"}!</Text>
+        </View>
         <TouchableOpacity style={styles.recent} onPress={() => router.replace("/journal")}>
           <Text style={styles.sectionTitle}>Recent Entries</Text>
 
@@ -116,7 +122,6 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
       </ScrollView>
-
       <Navbar />
     </View>
   );
@@ -129,7 +134,6 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    flex: 1,
     padding: 15,
   },
 
@@ -137,6 +141,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9DCE3',  
     borderRadius: 10,
     padding: 4,
+  },
+
+  hello: {
+    marginBottom: 16,
+  },
+
+  helloText: {
+    fontSize: FontSizes.xxl,
+    fontWeight: "700",
+    color: "#000000",
   },
 
   sectionTitle: {
@@ -150,6 +164,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9DCE3',  
     borderRadius: 10,
     padding: 4,
+    fontSize: FontSizes.s,
     
   },
 
@@ -169,5 +184,6 @@ const styles = StyleSheet.create({
 
     statValue: {  
     fontWeight: "600",
+    fontSize: FontSizes.m,
   },
 });
