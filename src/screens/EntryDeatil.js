@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: FontSizes.xxl,
+    fontSize: FontSizes.xl,
     fontWeight: '600',
     marginBottom: 10,
   },
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
 
   metaItem: {
-    fontSize: FontSizes.m,
+    fontSize: FontSizes.s,
     marginBottom: 4,
   },
 
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   statusText: {
     marginHorizontal: 16,
     marginTop: 16,
-    fontSize: FontSizes.m,
+    fontSize: FontSizes.l,
   },
 
   errorText: {
@@ -329,8 +329,7 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.m,
   },
   editDelete: {
-    marginHorizontal: 16,
-    marginBottom: 16,
+    marginHorizontal: 20,
     flexDirection: 'row',
     gap: 12,
   },

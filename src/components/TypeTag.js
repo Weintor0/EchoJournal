@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#2F3542',
-    fontSize: FontSizes.s,
+    fontSize: FontSizes.xs,
     fontWeight: '600',
   },
 });

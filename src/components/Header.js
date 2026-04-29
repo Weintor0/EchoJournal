@@ -17,14 +17,14 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   container: {
-    height: 70,
+    height: 60,
     backgroundColor: "#5A6FB2",
     justifyContent: "center",
     alignItems: "center",
   },
   title: {
     color: "black",
-    fontSize: FontSizes.xxxl,
+    fontSize: FontSizes.xxl,
     fontWeight: "600",
   },
 });

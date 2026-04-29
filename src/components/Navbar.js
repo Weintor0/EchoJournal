@@ -48,15 +48,15 @@ export default function Navbar() {
 
 const styles = StyleSheet.create({
   container: {
-    height: 60,
+    height: 50,
     backgroundColor: "#5A6FB2",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
   },
   icon: {
-    width: 28,
-    height: 28,
+    width: 26,
+    height: 26,
     resizeMode: "contain",
   },
 });
