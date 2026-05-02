@@ -236,8 +236,8 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: FontSizes.xl,
-    fontWeight: '600',
+    fontSize: FontSizes.xxl,
+    fontWeight: '700',
     marginBottom: 10,
   },
 
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
 
   metaItem: {
-    fontSize: FontSizes.s,
+    fontSize: FontSizes.m,
     marginBottom: 4,
   },
 
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: FontSizes.l,
+    fontSize: FontSizes.xl,
     fontWeight: '600',
     marginBottom: 6,
   },
@@ -319,14 +319,14 @@ const styles = StyleSheet.create({
   statusText: {
     marginHorizontal: 16,
     marginTop: 16,
-    fontSize: FontSizes.l,
+    fontSize: FontSizes.m,
   },
 
   errorText: {
     marginHorizontal: 16,
     marginTop: 16,
     color: '#B00020',
-    fontSize: FontSizes.m,
+    fontSize: FontSizes.s,
   },
   editDelete: {
     marginHorizontal: 20,

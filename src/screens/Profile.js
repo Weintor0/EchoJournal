@@ -252,11 +252,16 @@ const styles = StyleSheet.create({
   },
 
   title: { 
-    fontSize: FontSizes.xxl, fontWeight: 'bold', textAlign: 'center' 
+    fontSize: FontSizes.xxl,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 
   logout: { 
-    textAlign: 'center', color: 'gray', marginBottom: 20 
+    textAlign: 'center',
+    color: 'gray',
+    fontSize: FontSizes.m,
+    marginBottom: 20,
   },
 
   statsContainer: { 
@@ -301,7 +306,7 @@ const styles = StyleSheet.create({
   },
 
   errorText: {
-    fontSize: FontSizes.m,
+    fontSize: FontSizes.s,
     color: '#B00020',
   },
 });

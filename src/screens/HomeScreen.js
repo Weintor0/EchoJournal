@@ -84,13 +84,13 @@ export default function HomeScreen() {
         <TouchableOpacity style={styles.recent} onPress={() => router.replace("/journal")}>
           <Text style={styles.sectionTitle}>Recent Entries</Text>
 
-          {loading ? <Text>Loading recent entries...</Text> : null}
+          {loading ? <Text style={styles.bodyText}>Loading recent entries...</Text> : null}
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
           {!loading && !error ? (
             <FlatList
               data={recentEntries}
               keyExtractor={(item) => String(item.id)}
-              ListEmptyComponent={<Text>No entries yet.</Text>}
+              ListEmptyComponent={<Text style={styles.bodyText}>No entries yet.</Text>}
               scrollEnabled={false}
               renderItem={({ item }) => (
                 <EntryCard
@@ -107,17 +107,17 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>My Stats</Text>
 
           <View style={styles.statsRow}>
-            <Text>Most Used Type</Text>
+            <Text style={styles.bodyText}>Most Used Type</Text>
             <Text style={styles.statValue}>{stats.mostUsedType}</Text>
           </View>
 
           <View style={styles.statsRow}>
-            <Text>Entries This Week</Text>
+            <Text style={styles.bodyText}>Entries This Week</Text>
             <Text style={styles.statValue}>{stats.entriesThisWeek}</Text>
           </View>
 
           <View style={styles.statsRow}>
-            <Text>Streak</Text>
+            <Text style={styles.bodyText}>Streak</Text>
             <Text style={styles.statValue}>{stats.currentStreak} Days</Text>
           </View>
         </TouchableOpacity>
@@ -159,6 +159,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+  bodyText: {
+    fontSize: FontSizes.m,
+  },
+
   stats: {
     marginTop: 20,
     backgroundColor: '#D9DCE3',  
@@ -179,6 +183,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     color: "#B00020",
+    fontSize: FontSizes.s,
     marginBottom: 10,
   },
 
