@@ -595,8 +595,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: FontSizes.xl,
-    fontWeight: '600',
+    fontSize: FontSizes.xxl,
+    fontWeight: '700',
     marginBottom: 12,
   },
   input: {
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   sectionTitle: {
-    fontSize: FontSizes.l,
+    fontSize: FontSizes.xl,
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#000000',
-    fontSize: FontSizes.xl,
+    fontSize: FontSizes.m,
     fontWeight: '600',
   },
   buttonDisabled: {

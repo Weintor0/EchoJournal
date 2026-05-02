@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   title: {
-    fontSize: FontSizes.xxxl,
+    fontSize: FontSizes.xxl,
     fontWeight: '700',
     marginBottom: 16,
     textAlign: 'center',
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#000000',
-    fontSize: FontSizes.xl,
+    fontSize: FontSizes.m,
     fontWeight: '600',
   },
   linkText: {

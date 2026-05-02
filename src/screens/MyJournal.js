@@ -71,13 +71,13 @@ export default function MyJournalScreen() {
       <Header />
       <View style={styles.content}>
         <Text style={styles.header}>My Journal</Text>
-        {loading ? <Text>Loading your entries...</Text> : null}
+        {loading ? <Text style={styles.bodyText}>Loading your entries...</Text> : null}
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
         {!loading && !error ? (
           <FlatList
             data={entries}
             keyExtractor={(item) => String(item.id)}
-            ListEmptyComponent={<Text>No entries yet.</Text>}
+            ListEmptyComponent={<Text style={styles.bodyText}>No entries yet.</Text>}
             renderItem={({ item }) => (
               <EntryCard
                 entry={item}
@@ -106,12 +106,17 @@ const styles = StyleSheet.create({
 
   header: { 
     fontSize: FontSizes.xxl, 
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 10 
+  },
+
+  bodyText: {
+    fontSize: FontSizes.m,
   },
 
   errorText: {
     color: '#B00020',
+    fontSize: FontSizes.s,
     marginBottom: 10,
   },
 });
