@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   details: {
-    fontSize: FontSizes.xs,
+    fontSize: FontSizes.xxs,
     textAlign: "right",
   },
   actionButtonText: {

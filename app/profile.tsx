@@ -1,3 +1,10 @@
+import RequireAuth from '@/src/components/RequireAuth';
 import ProfileScreen from '@/src/screens/Profile';
 
-export default ProfileScreen;
+export default function ProfileRoute() {
+  return (
+    <RequireAuth>
+      <ProfileScreen />
+    </RequireAuth>
+  );
+}

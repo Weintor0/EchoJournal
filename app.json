@@ -22,8 +22,11 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "apiBaseUrl": "http://192.168.1.106:3000"
     },
     "plugins": [
       "expo-router",
