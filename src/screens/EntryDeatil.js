@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: FontSizes.xxl,
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 10,
   },
 
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: FontSizes.l,
+    fontSize: FontSizes.xl,
     fontWeight: '600',
     marginBottom: 6,
   },
@@ -326,11 +326,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     color: '#B00020',
-    fontSize: FontSizes.m,
+    fontSize: FontSizes.s,
   },
   editDelete: {
-    marginHorizontal: 16,
-    marginBottom: 16,
+    marginHorizontal: 20,
     flexDirection: 'row',
     gap: 12,
   },

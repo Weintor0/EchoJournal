@@ -1,6 +1,9 @@
 const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
-const db = new sqlite3.Database("./database.sqlite", (err) => {
+const dbPath = path.join(__dirname, "database.sqlite");
+
+const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error(err.message);
   } else {
@@ -18,6 +21,18 @@ db.serialize(() => {
       rating TEXT,
       date TEXT,
       imageUrl TEXT,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      surname TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      passwordHash TEXT NOT NULL,
+      profilePicture TEXT,
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -53,6 +68,23 @@ db.serialize(() => {
             }
           }
         );
+      });
+    }
+  });
+
+  db.all("PRAGMA table_info(users)", [], (err, columns) => {
+    if (err) {
+      console.error("Failed to inspect users schema.", err.message);
+      return;
+    }
+
+    const columnNames = new Set(columns.map((column) => column.name));
+
+    if (!columnNames.has("profilePicture")) {
+      db.run("ALTER TABLE users ADD COLUMN profilePicture TEXT", (alterErr) => {
+        if (alterErr) {
+          console.error("Failed to add profilePicture column.", alterErr.message);
+        }
       });
     }
   });
