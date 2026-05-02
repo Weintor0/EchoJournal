@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-    statValue: {  
+  statValue: {  
     fontWeight: "600",
     fontSize: FontSizes.m,
   },
