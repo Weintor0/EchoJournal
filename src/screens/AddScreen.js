@@ -1,17 +1,18 @@
 import { createEntry, deleteEntry, getEntryById, updateEntry } from '@/src/api/entries';
 import Header from '@/src/components/Header';
 import Navbar from '@/src/components/Navbar';
+import RatingSlider from "@/src/components/RatingSlider";
 import TypeTag from '@/src/components/TypeTag';
 import { ENTRY_TYPES } from '@/src/constants/entryTypes';
 import { FontSizes } from '@/src/constants/typography';
+import { parseDateValue } from "@/src/utils/date";
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Image,
   Modal,
-  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -36,7 +37,6 @@ const MONTH_NAMES = [
   'December',
 ];
 const WEEKDAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-const SLIDER_STEP = 0.1;
 const MAX_IMAGE_DIMENSION = 1200;
 
 function formatRatingValue(value) {
@@ -49,29 +49,6 @@ function formatDateValue(date) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
-}
-
-function parseDateValue(value) {
-  if (typeof value !== 'string') return null;
-
-  const match = value.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-  if (!match) return null;
-
-  const [, dayText, monthText, yearText] = match;
-  const day = Number.parseInt(dayText, 10);
-  const month = Number.parseInt(monthText, 10) - 1;
-  const year = Number.parseInt(yearText, 10);
-  const parsedDate = new Date(year, month, day);
-
-  if (
-    parsedDate.getFullYear() !== year ||
-    parsedDate.getMonth() !== month ||
-    parsedDate.getDate() !== day
-  ) {
-    return null;
-  }
-
-  return parsedDate;
 }
 
 function getCalendarDays(baseDate) {
@@ -138,9 +115,7 @@ export default function AddScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
-  const [sliderWidth, setSliderWidth] = useState(0);
   const [isLoadingEntry, setIsLoadingEntry] = useState(isEditMode);
-  const sliderWidthRef = useRef(0);
 
   const parsedRating = Number.parseFloat(rating.replace(',', '.'));
   const sliderValue = Number.isNaN(parsedRating) ? 0 : Math.max(0, Math.min(10, parsedRating));
@@ -204,19 +179,6 @@ export default function AddScreen() {
 
     setRatingFromSlider(nextValue);
   }
-
-  const sliderPanResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (event) => {
-        updateRatingFromPosition(event.nativeEvent.locationX);
-      },
-      onPanResponderMove: (event) => {
-        updateRatingFromPosition(event.nativeEvent.locationX);
-      },
-    })
-  ).current;
 
   function handleRatingChange(value) {
     const normalizedValue = value.replace(',', '.');
@@ -390,92 +352,70 @@ export default function AddScreen() {
         <View style={styles.info}>
           <Text style={styles.title}>{screenTitle}</Text>
           {isLoadingEntry ? <Text style={styles.helperText}>Loading entry...</Text> : null}
+          <View style={styles.section}>
+            <Text style={styles.fieldLabel}>Title</Text>
+            <TextInput
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Title"
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.section}>
+            <View style={styles.metaRow}>
+              <View style={styles.metaInput}>
+                <Text style={styles.fieldLabel}>Type</Text>
+                <View style={styles.typeList}>
+                  {ENTRY_TYPES.map((entryType) => {
+                    const isSelected = entryType.label === type;
 
-          <TextInput
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Title"
-            style={styles.input}
-          />
-
-          <View style={styles.metaRow}>
-            <View style={styles.metaInput}>
-              <Text style={styles.fieldLabel}>Type</Text>
-              <View style={styles.typeList}>
-                {ENTRY_TYPES.map((entryType) => {
-                  const isSelected = entryType.label === type;
-
-                  return (
-                    <Pressable
-                      key={entryType.label}
-                      onPress={() => setType(entryType.label)}
-                      style={[styles.typeOption, isSelected && styles.typeOptionSelected]}
-                    >
-                      <TypeTag
-                        type={entryType.label}
-                        style={styles.typeTag}
-                        textStyle={styles.typeTagText}
-                      />
-                    </Pressable>
-                  );
-                })}
+                    return (
+                      <Pressable
+                        key={entryType.label}
+                        onPress={() => setType(entryType.label)}
+                        style={[styles.typeOption, isSelected && styles.typeOptionSelected]}
+                      >
+                        <TypeTag
+                          type={entryType.label}
+                          style={styles.typeTag}
+                          textStyle={styles.typeTagText}
+                        />
+                      </Pressable>
+                    );
+                  })}
+                </View>
               </View>
             </View>
           </View>
-
-          <TextInput
-            value={rating}
-            onChangeText={handleRatingChange}
-            onBlur={handleRatingBlur}
-            placeholder="Rating (0-10)"
-            keyboardType="decimal-pad"
-            style={styles.input}
-          />
-          <View
-            style={styles.sliderSection}
-            onLayout={(event) => {
-              const { width } = event.nativeEvent.layout;
-              sliderWidthRef.current = width;
-              setSliderWidth(width);
-            }}
-            {...sliderPanResponder.panHandlers}
-          >
-            <View style={styles.sliderTrack}>
-              <View
-                style={[styles.sliderFill, { width: sliderWidth ? `${(sliderValue / 10) * 100}%` : '0%' }]}
-              />
-              <View
-                style={[
-                  styles.sliderThumb,
-                  { left: sliderWidth ? (sliderValue / 10) * sliderWidth - 12 : -12 },
-                ]}
-              />
-            </View>
-            <View style={styles.sliderLabels}>
-              <Text style={styles.sliderLabel}>0</Text>
-              <Text style={styles.sliderValue}>{formatRatingValue(sliderValue)}</Text>
-              <Text style={styles.sliderLabel}>10</Text>
-            </View>
+          <View style={styles.section}>
+            <Text style={styles.fieldLabel}>Rating</Text>
+            <RatingSlider
+              value={sliderValue}
+              onChange={(val) => setRating(val.toString())}
+            />
           </View>
-
-          <Text style={styles.fieldLabel}>Date</Text>
-          <Pressable style={styles.input} onPress={openCalendar}>
-            <Text style={date ? styles.dateText : styles.datePlaceholder}>
-              {date || 'Pick a date'}
-            </Text>
-          </Pressable>
-
-          <Text style={styles.fieldLabel}>Cover Image</Text>
-          <Pressable style={styles.uploadButton} onPress={handlePickImage}>
-            <Text style={styles.uploadButtonText}>Upload From Gallery</Text>
-          </Pressable>
-          <Image
-            source={imageUrl ? { uri: imageUrl } : noImagePlaceholder}
-            style={styles.previewImage}
-            resizeMode={imageUrl ? 'cover' : 'contain'}
-          />
-          {!imageUrl ? <Text style={styles.helperText}>No image selected yet.</Text> : null}
+          <View style={styles.section}>
+            <Text style={styles.fieldLabel}>Date</Text>
+            <Pressable style={styles.input} onPress={openCalendar}>
+              <Text style={date ? styles.dateText : styles.datePlaceholder}>
+                {date || 'Pick a date'}
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.fieldLabel}>Cover Image</Text>
+            <Pressable style={styles.uploadButton} onPress={handlePickImage}>
+              <Text style={styles.uploadButtonText}>Upload From Gallery</Text>
+            </Pressable>
+            <Image
+              source={imageUrl ? { uri: imageUrl } : noImagePlaceholder}
+              style={styles.previewImage}
+              resizeMode={imageUrl ? 'cover' : 'contain'}
+            />
+            {!imageUrl ? <Text style={styles.helperText}>No image selected yet.</Text> : null}
+          </View>
         </View>
+
 
         <View style={styles.thoughts}>
           <Text style={styles.sectionTitle}>My Thoughts</Text>
@@ -588,6 +528,9 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
+  section: {
+    marginBottom: 16,
+  },
   info: {
     padding: 16,
     backgroundColor: '#D9DCE3',
@@ -605,7 +548,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: FontSizes.m,
-    marginBottom: 12,
     width: '100%',
   },
   dateText: {
@@ -615,9 +557,6 @@ const styles = StyleSheet.create({
   datePlaceholder: {
     fontSize: FontSizes.m,
     color: '#666666',
-  },
-  metaRow: {
-    marginBottom: 10,
   },
   fieldLabel: {
     fontSize: FontSizes.s,
@@ -648,50 +587,6 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.s,
     color: '#555',
     marginBottom: 8,
-  },
-  sliderSection: {
-    marginBottom: 12,
-  },
-  sliderTrack: {
-    height: 10,
-    backgroundColor: '#C4C8D1',
-    borderRadius: 999,
-    position: 'relative',
-    justifyContent: 'center',
-    marginTop: 6,
-  },
-  sliderFill: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: '#5A6FB2',
-    borderRadius: 999,
-  },
-  sliderThumb: {
-    position: 'absolute',
-    top: -7,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#5A6FB2',
-  },
-  sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  sliderLabel: {
-    fontSize: FontSizes.s,
-    color: '#555555',
-  },
-  sliderValue: {
-    fontSize: FontSizes.s,
-    fontWeight: '600',
-    color: '#000000',
   },
   typeList: {
     flexDirection: 'row',
