@@ -370,6 +370,9 @@ const processedEntries = React.useMemo(() => {
           </View>
           {/* ACTIONS */}
           <View style={styles.modalActions}>
+            <TouchableOpacity onPress={() => setFilterVisible(false)}>
+              <Text style={styles.actionText}>Apply</Text>
+            </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => {
                 setSelectedTypes([]);
@@ -496,7 +499,8 @@ const styles = StyleSheet.create({
 
   modalActions: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
+    marginTop: 12,
   },
 
   actionText: {

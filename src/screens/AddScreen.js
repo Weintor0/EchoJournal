@@ -6,13 +6,15 @@ import TypeTag from '@/src/components/TypeTag';
 import { ENTRY_TYPES } from '@/src/constants/entryTypes';
 import { FontSizes } from '@/src/constants/typography';
 import { parseDateValue } from "@/src/utils/date";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Image,
-  Modal,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,21 +24,6 @@ import {
 } from 'react-native';
 
 const noImagePlaceholder = require('../assets/no-image.png');
-const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-const WEEKDAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const MAX_IMAGE_DIMENSION = 1200;
 
 function formatRatingValue(value) {
@@ -49,25 +36,6 @@ function formatDateValue(date) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
   return `${day}.${month}.${year}`;
-}
-
-function getCalendarDays(baseDate) {
-  const year = baseDate.getFullYear();
-  const month = baseDate.getMonth();
-  const firstDayOfMonth = new Date(year, month, 1);
-  const startOffset = (firstDayOfMonth.getDay() + 6) % 7;
-  const gridStartDate = new Date(year, month, 1 - startOffset);
-
-  return Array.from({ length: 42 }, (_, index) => {
-    const date = new Date(gridStartDate);
-    date.setDate(gridStartDate.getDate() + index);
-
-    return {
-      key: `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
-      date,
-      isCurrentMonth: date.getMonth() === month,
-    };
-  });
 }
 
 function getResizeAction(asset) {
@@ -113,14 +81,13 @@ export default function AddScreen() {
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [isLoadingEntry, setIsLoadingEntry] = useState(isEditMode);
 
   const parsedRating = Number.parseFloat(rating.replace(',', '.'));
   const sliderValue = Number.isNaN(parsedRating) ? 0 : Math.max(0, Math.min(10, parsedRating));
   const selectedDate = parseDateValue(date);
-  const calendarDays = getCalendarDays(calendarMonth);
+  const datePickerValue = selectedDate ?? new Date();
 
   useEffect(() => {
     let isActive = true;
@@ -170,14 +137,20 @@ export default function AddScreen() {
     setError('');
   }
 
-  function openCalendar() {
-    setCalendarMonth(parseDateValue(date) ?? new Date());
-    setIsCalendarVisible(true);
+  function openDatePicker() {
+    setIsDatePickerVisible(true);
   }
 
-  function handleSelectDate(nextDate) {
+  function handleDateChange(event, nextDate) {
+    if (Platform.OS !== 'ios') {
+      setIsDatePickerVisible(false);
+    }
+
+    if (event?.type === 'dismissed' || !nextDate) {
+      return;
+    }
+
     setDate(formatDateValue(nextDate));
-    setIsCalendarVisible(false);
     setError('');
   }
 
@@ -297,172 +270,121 @@ export default function AddScreen() {
     <View style={styles.container}>
       <Header />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.info}>
-          <Text style={styles.title}>{screenTitle}</Text>
-          {isLoadingEntry ? <Text style={styles.helperText}>Loading entry...</Text> : null}
-          <View style={styles.section}>
-            <Text style={styles.fieldLabel}>Title</Text>
-            <TextInput
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Title"
-              style={styles.input}
-            />
-          </View>
-          <View style={styles.section}>
-            <View style={styles.metaRow}>
-              <View style={styles.metaInput}>
-                <Text style={styles.fieldLabel}>Type</Text>
-                <View style={styles.typeList}>
-                  {ENTRY_TYPES.map((entryType) => {
-                    const isSelected = entryType.label === type;
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
+      >
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+        >
+          <View style={styles.info}>
+            <Text style={styles.title}>{screenTitle}</Text>
+            {isLoadingEntry ? <Text style={styles.helperText}>Loading entry...</Text> : null}
+            <View style={styles.section}>
+              <Text style={styles.fieldLabel}>Title</Text>
+              <TextInput
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Title"
+                style={styles.input}
+              />
+            </View>
+            <View style={styles.section}>
+              <View style={styles.metaRow}>
+                <View style={styles.metaInput}>
+                  <Text style={styles.fieldLabel}>Type</Text>
+                  <View style={styles.typeList}>
+                    {ENTRY_TYPES.map((entryType) => {
+                      const isSelected = entryType.label === type;
 
-                    return (
-                      <Pressable
-                        key={entryType.label}
-                        onPress={() => setType(entryType.label)}
-                        style={[styles.typeOption, isSelected && styles.typeOptionSelected]}
-                      >
-                        <TypeTag
-                          type={entryType.label}
-                          style={styles.typeTag}
-                          textStyle={styles.typeTagText}
-                        />
-                      </Pressable>
-                    );
-                  })}
+                      return (
+                        <Pressable
+                          key={entryType.label}
+                          onPress={() => setType(entryType.label)}
+                          style={[styles.typeOption, isSelected && styles.typeOptionSelected]}
+                        >
+                          <TypeTag
+                            type={entryType.label}
+                            style={styles.typeTag}
+                            textStyle={styles.typeTagText}
+                          />
+                        </Pressable>
+                      );
+                    })}
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.fieldLabel}>Rating</Text>
-            <RatingSlider
-              value={sliderValue}
-              onChange={setRatingFromSlider}
-            />
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.fieldLabel}>Date</Text>
-            <Pressable style={styles.input} onPress={openCalendar}>
-              <Text style={date ? styles.dateText : styles.datePlaceholder}>
-                {date || 'Pick a date'}
-              </Text>
-            </Pressable>
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.fieldLabel}>Cover Image</Text>
-            <Pressable style={styles.uploadButton} onPress={handlePickImage}>
-              <Text style={styles.uploadButtonText}>Upload From Gallery</Text>
-            </Pressable>
-            <Image
-              source={imageUrl ? { uri: imageUrl } : noImagePlaceholder}
-              style={styles.previewImage}
-              resizeMode={imageUrl ? 'cover' : 'contain'}
-            />
-            {!imageUrl ? <Text style={styles.helperText}>No image selected yet.</Text> : null}
-          </View>
-        </View>
-
-
-        <View style={styles.thoughts}>
-          <Text style={styles.sectionTitle}>My Thoughts</Text>
-          <TextInput
-            value={note}
-            onChangeText={setNote}
-            placeholder="Write your thoughts..."
-            multiline
-            textAlignVertical="top"
-            style={styles.noteInput}
-          />
-        </View>
-
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-        <Pressable
-          style={[styles.button, (isSubmitting || isLoadingEntry) && styles.buttonDisabled]}
-          onPress={handleSaveEntry}
-          disabled={isSubmitting || isLoadingEntry}
-        >
-          <Text style={styles.buttonText}>
-            {isSubmitting ? 'Saving...' : submitLabel}
-          </Text>
-        </Pressable>
-      </ScrollView>
-
-      <Modal
-        visible={isCalendarVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsCalendarVisible(false)}
-      >
-        <Pressable style={styles.calendarBackdrop} onPress={() => setIsCalendarVisible(false)}>
-          <Pressable style={styles.calendarModal} onPress={() => {}}>
-            <View style={styles.calendarHeader}>
-              <Pressable
-                style={styles.calendarNavButton}
-                onPress={() =>
-                  setCalendarMonth(
-                    new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1)
-                  )
-                }
-              >
-                <Text style={styles.calendarNavText}>{'<'}</Text>
-              </Pressable>
-              <Text style={styles.calendarTitle}>
-                {MONTH_NAMES[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
-              </Text>
-              <Pressable
-                style={styles.calendarNavButton}
-                onPress={() =>
-                  setCalendarMonth(
-                    new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1)
-                  )
-                }
-              >
-                <Text style={styles.calendarNavText}>{'>'}</Text>
-              </Pressable>
+            <View style={styles.section}>
+              <Text style={styles.fieldLabel}>Rating</Text>
+              <RatingSlider
+                value={sliderValue}
+                onChange={setRatingFromSlider}
+              />
             </View>
-
-            <View style={styles.calendarWeekdays}>
-              {WEEKDAY_LABELS.map((label) => (
-                <Text key={label} style={styles.calendarWeekdayText}>
-                  {label}
+            <View style={styles.section}>
+              <Text style={styles.fieldLabel}>Date</Text>
+              <Pressable style={styles.input} onPress={openDatePicker}>
+                <Text style={date ? styles.dateText : styles.datePlaceholder}>
+                  {date || 'Pick a date'}
                 </Text>
-              ))}
+              </Pressable>
+              {isDatePickerVisible ? (
+                <DateTimePicker
+                  value={datePickerValue}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'compact' : 'default'}
+                  onChange={handleDateChange}
+                  style={styles.datePicker}
+                />
+              ) : null}
             </View>
-
-            <View style={styles.calendarGrid}>
-              {calendarDays.map(({ key, date: dayDate, isCurrentMonth }) => {
-                const isSelected =
-                  selectedDate &&
-                  dayDate.getDate() === selectedDate.getDate() &&
-                  dayDate.getMonth() === selectedDate.getMonth() &&
-                  dayDate.getFullYear() === selectedDate.getFullYear();
-
-                return (
-                  <Pressable
-                    key={key}
-                    style={[styles.calendarDay, isSelected && styles.calendarDaySelected]}
-                    onPress={() => handleSelectDate(dayDate)}
-                  >
-                    <Text
-                      style={[
-                        styles.calendarDayText,
-                        !isCurrentMonth && styles.calendarDayOutsideMonth,
-                        isSelected && styles.calendarDaySelectedText,
-                      ]}
-                    >
-                      {dayDate.getDate()}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+            <View style={styles.section}>
+              <Text style={styles.fieldLabel}>Cover Image</Text>
+              <Pressable style={styles.uploadButton} onPress={handlePickImage}>
+                <Text style={styles.uploadButtonText}>Upload From Gallery</Text>
+              </Pressable>
+              <Image
+                source={imageUrl ? { uri: imageUrl } : noImagePlaceholder}
+                style={styles.previewImage}
+                resizeMode={imageUrl ? 'cover' : 'contain'}
+              />
+              {!imageUrl ? <Text style={styles.helperText}>No image selected yet.</Text> : null}
             </View>
+          </View>
+
+
+          <View style={styles.thoughts}>
+            <Text style={styles.sectionTitle}>My Thoughts</Text>
+            <TextInput
+              value={note}
+              onChangeText={setNote}
+              placeholder="Write your thoughts..."
+              multiline
+              textAlignVertical="top"
+              style={[
+                styles.noteInput,
+              ]}
+              scrollEnabled
+            />
+          </View>
+
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+          <Pressable
+            style={[styles.button, (isSubmitting || isLoadingEntry) && styles.buttonDisabled]}
+            onPress={handleSaveEntry}
+            disabled={isSubmitting || isLoadingEntry}
+          >
+            <Text style={styles.buttonText}>
+              {isSubmitting ? 'Saving...' : submitLabel}
+            </Text>
           </Pressable>
-        </Pressable>
-      </Modal>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <Navbar />
     </View>
@@ -474,9 +396,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#E6E6E6',
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   content: {
     padding: 16,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   section: {
     marginBottom: 16,
@@ -507,6 +432,10 @@ const styles = StyleSheet.create({
   datePlaceholder: {
     fontSize: FontSizes.m,
     color: '#666666',
+  },
+  datePicker: {
+    alignSelf: 'flex-start',
+    marginTop: 8,
   },
   fieldLabel: {
     fontSize: FontSizes.s,
@@ -571,7 +500,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   noteInput: {
-    minHeight: 120,
+    minHeight: 220,
+    maxHeight: 360,
     backgroundColor: '#E6E6E6',
     borderRadius: 8,
     paddingHorizontal: 12,
@@ -597,79 +527,5 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.7,
-  },
-  calendarBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  calendarModal: {
-    backgroundColor: '#F4F5F7',
-    borderRadius: 16,
-    padding: 16,
-    width: '100%',
-    maxWidth: 420,
-    alignSelf: 'center',
-  },
-  calendarHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  calendarNavButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#D9DCE3',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarNavText: {
-    fontSize: FontSizes.l,
-    fontWeight: '600',
-  },
-  calendarTitle: {
-    fontSize: FontSizes.m,
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'center',
-  },
-  calendarWeekdays: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  calendarWeekdayText: {
-    width: `${100 / 7}%`,
-    textAlign: 'center',
-    fontSize: FontSizes.s,
-    fontWeight: '600',
-    color: '#666666',
-  },
-  calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  calendarDay: {
-    width: `${100 / 7}%`,
-    aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 999,
-  },
-  calendarDaySelected: {
-    backgroundColor: '#5A6FB2',
-  },
-  calendarDayText: {
-    fontSize: FontSizes.s,
-    color: '#000000',
-  },
-  calendarDayOutsideMonth: {
-    color: '#9AA0AE',
-  },
-  calendarDaySelectedText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
   },
 });
