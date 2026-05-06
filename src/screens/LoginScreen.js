@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
   },
   login: {
     flexGrow: 1,
-    justifyContent: 'center',
     padding: 20,
+    marginTop: '25%',
   },
   form: {
     backgroundColor: '#D9DCE3',
