@@ -9,7 +9,7 @@ export default function Header() {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => router.replace("/")}>
-        <Text style={styles.title}>Personal Media Journal</Text>
+        <Text style={styles.title} numberOfLines={2}>Personal Media Journal</Text>
       </TouchableOpacity>
     </View>
   );
@@ -17,14 +17,18 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   container: {
-    height: 60,
+    minHeight: 60,
     backgroundColor: "#5A6FB2",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   title: {
     color: "black",
     fontSize: FontSizes.xxl,
     fontWeight: "600",
+    maxWidth: "100%",
+    textAlign: "center",
   },
 });

@@ -1,8 +1,18 @@
-import { useRef } from "react";
-import { PanResponder, StyleSheet, Text, View } from "react-native";
+import Slider from "@react-native-community/slider";
+import { StyleSheet, Text, View } from "react-native";
 import { FontSizes } from "../constants/typography";
 
-const SLIDER_STEP = 0.1;
+const SLIDER_STEP = 0.5;
+
+function normalizeValue(value, min, max, step) {
+  const clamped = Math.max(min, Math.min(max, Number(value) || 0));
+  const stepped = Math.round(clamped / step) * step;
+  return Math.round(stepped * 10) / 10;
+}
+
+function formatValue(value) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
 
 export default function RatingSlider({
   value = 0,
@@ -12,68 +22,34 @@ export default function RatingSlider({
   step = SLIDER_STEP,
   showValue = true,
 }) {
-  const sliderWidthRef = useRef(0);
-
-  function normalizeValue(val) {
-    const clamped = Math.max(min, Math.min(max, val));
-    const stepped =
-      Math.round(clamped * (1 / step)) / (1 / step);
-    return stepped;
-  }
-
-  function updateFromPosition(positionX) {
-    if (sliderWidthRef.current <= 0) return;
-
-    const clampedPosition = Math.max(
-      0,
-      Math.min(sliderWidthRef.current, positionX)
-    );
-
-    const ratio = clampedPosition / sliderWidthRef.current;
-    const rawValue = min + ratio * (max - min);
-
-    const finalValue = normalizeValue(rawValue);
-    onChange(finalValue);
-  }
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (e) => {
-        updateFromPosition(e.nativeEvent.locationX);
-      },
-      onPanResponderMove: (e) => {
-        updateFromPosition(e.nativeEvent.locationX);
-      },
-    })
-  ).current;
-
-  const percentage = (value - min) / (max - min);
+  const sliderValue = normalizeValue(value, min, max, step);
 
   return (
     <View style={styles.container}>
       {showValue && (
-        <Text style={styles.valueText}>
-          {value.toFixed(1)}
-        </Text>
+        <View style={styles.valueRow}>
+          <Text style={styles.valueText}>{formatValue(sliderValue)}</Text>
+          <Text style={styles.maxText}>/ {formatValue(max)}</Text>
+        </View>
       )}
 
-      <View
-        style={styles.track}
-        onLayout={(e) => {
-          sliderWidthRef.current = e.nativeEvent.layout.width;
+      <Slider
+        style={styles.slider}
+        minimumValue={min}
+        maximumValue={max}
+        step={step}
+        value={sliderValue}
+        minimumTrackTintColor="#5A6FB2"
+        maximumTrackTintColor="#C4C8D1"
+        thumbTintColor="#5A6FB2"
+        onValueChange={(nextValue) => {
+          onChange?.(normalizeValue(nextValue, min, max, step));
         }}
-        {...panResponder.panHandlers}
-      >
-        <View style={[styles.filled, { width: `${percentage * 100}%` }]} />
+      />
 
-        <View
-          style={[
-            styles.thumb,
-            { left: `${percentage * 100}%` },
-          ]}
-        />
+      <View style={styles.rangeRow}>
+        <Text style={styles.rangeText}>{formatValue(min)}</Text>
+        <Text style={styles.rangeText}>{formatValue(max)}</Text>
       </View>
     </View>
   );
@@ -81,34 +57,35 @@ export default function RatingSlider({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
+    width: "100%",
+    marginTop: 6,
+    marginBottom: 10,
+  },
+  valueRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    marginBottom: 2,
   },
   valueText: {
-    textAlign: "start",
-    marginBottom: 5,
     fontWeight: "600",
-    fontSize: FontSizes.l,
+    fontSize: FontSizes.xl,
   },
-  track: {
-    height: 10,
-    backgroundColor: '#C4C8D1',
-    borderRadius: 999,
-    position: 'relative',
-    justifyContent: 'center',
-    marginTop: 6,
+  maxText: {
+    marginLeft: 4,
+    color: "#555555",
+    fontSize: FontSizes.s,
   },
-  filled: {
-    position: "absolute",
-    height: 6,
-    backgroundColor: "rgb(90, 111, 178)",
-    borderRadius: 3,
+  slider: {
+    width: "100%",
+    height: 42,
   },
-  thumb: {
-    position: "absolute",
-    width: 16,
-    height: 16,
-    backgroundColor: "rgb(90, 111, 178)",
-    borderRadius: 8,
-    transform: [{ translateX: -8 }],
+  rangeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 2,
+  },
+  rangeText: {
+    color: "#555555",
+    fontSize: FontSizes.xs,
   },
 });

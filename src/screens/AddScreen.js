@@ -170,57 +170,6 @@ export default function AddScreen() {
     setError('');
   }
 
-  function updateRatingFromPosition(positionX) {
-    if (sliderWidthRef.current <= 0) return;
-
-    const clampedPosition = Math.max(0, Math.min(sliderWidthRef.current, positionX));
-    const nextValue =
-      Math.round((clampedPosition / sliderWidthRef.current) * (10 / SLIDER_STEP)) * SLIDER_STEP;
-
-    setRatingFromSlider(nextValue);
-  }
-
-  function handleRatingChange(value) {
-    const normalizedValue = value.replace(',', '.');
-
-    if (normalizedValue === '') {
-      setRating('');
-      setError('');
-      return;
-    }
-
-    if (!/^\d{0,2}(\.\d?)?$/.test(normalizedValue)) {
-      return;
-    }
-
-    const numericValue = Number.parseFloat(normalizedValue);
-
-    if (!Number.isNaN(numericValue) && numericValue > 10) {
-      return;
-    }
-
-    setRating(normalizedValue);
-    setError('');
-  }
-
-  function handleRatingBlur() {
-    const normalizedValue = rating.replace(',', '.').trim();
-
-    if (!normalizedValue) {
-      setRating('');
-      return;
-    }
-
-    const numericValue = Number.parseFloat(normalizedValue);
-
-    if (Number.isNaN(numericValue)) {
-      setRating('');
-      return;
-    }
-
-    setRating(formatRatingValue(Math.max(0, Math.min(10, numericValue))));
-  }
-
   function openCalendar() {
     setCalendarMonth(parseDateValue(date) ?? new Date());
     setIsCalendarVisible(true);
@@ -391,7 +340,7 @@ export default function AddScreen() {
             <Text style={styles.fieldLabel}>Rating</Text>
             <RatingSlider
               value={sliderValue}
-              onChange={(val) => setRating(val.toString())}
+              onChange={setRatingFromSlider}
             />
           </View>
           <View style={styles.section}>
@@ -527,6 +476,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    paddingBottom: 24,
   },
   section: {
     marginBottom: 16,
@@ -576,8 +526,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   previewImage: {
-    width: 100,
-    height: 140,
+    height: 'auto',
+    width: '32%',
+    maxWidth: 120,
+    minWidth: 88,
+    aspectRatio: 5 / 7,
     borderRadius: 8,
     marginBottom: 8,
     backgroundColor: '#C4C8D1',
@@ -649,12 +602,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.35)',
     justifyContent: 'center',
-    padding: 20,
+    padding: 16,
   },
   calendarModal: {
     backgroundColor: '#F4F5F7',
     borderRadius: 16,
     padding: 16,
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
   },
   calendarHeader: {
     flexDirection: 'row',
@@ -677,6 +633,8 @@ const styles = StyleSheet.create({
   calendarTitle: {
     fontSize: FontSizes.m,
     fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
   },
   calendarWeekdays: {
     flexDirection: 'row',
