@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const ALLOWED_NOTE_COLORS = new Set(["#000000", "#1D4ED8", "#B00020"]);
+const ALLOWED_NOTE_FONTS = new Set(["default", "serif", "mono"]);
+
 
 // GET all entries
 router.get("/", (req, res) => {
@@ -43,8 +46,8 @@ router.post("/", (req, res) => {
   }
 
   db.run(
-    `INSERT INTO entries (title, note, type, rating, date, imageUrl, createdAt)
-     VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+    `INSERT INTO entries (title, note,type, rating, date, imageUrl, createdAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
     [title, note, type, rating, date, imageUrl],
     function (err) {
       if (err) {

@@ -1,7 +1,7 @@
 import { deleteEntry, getEntryById } from '@/src/api/entries';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Header from '../components/Header';
 import Navbar from '../components/Navbar';
 import TypeTag from '../components/TypeTag';
@@ -10,6 +10,20 @@ import { FontSizes } from '../constants/typography';
 const starIcon = require('../assets/icons/star.png');
 const calendarIcon = require('../assets/icons/calendar.png');
 const noImagePlaceholder = require('../assets/no-image.png');
+const NOTE_COLORS = ['#000000', '#1D4ED8', '#B00020'];
+const NOTE_FONTS = ['default', 'serif', 'mono'];
+
+function getNoteFontFamily(noteFont) {
+  if (noteFont === 'serif') {
+    return Platform.select({ ios: 'Georgia', android: 'serif', default: 'serif' });
+  }
+
+  if (noteFont === 'mono') {
+    return Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' });
+  }
+
+  return undefined;
+}
 
 export default function EntryDetailScreen() {
   const router = useRouter();
@@ -151,7 +165,13 @@ export default function EntryDetailScreen() {
 
             <View style={styles.thoughts}>
               <Text style={styles.sectionTitle}>My Thoughts</Text>
-              <Text style={styles.metaItem}>{note}</Text>
+              <Text
+                style={[
+                  styles.metaItem
+                ]}
+              >
+                {note}
+              </Text>
             </View>
 
             <View style={styles.editDelete}>
