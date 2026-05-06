@@ -128,18 +128,18 @@ export default function EntryDetailScreen() {
                 </View>
 
                 <View style={styles.metaText}>
-                  <View style={styles.typeRow}>
+                  <View style={styles.infoRow}>
                     <Text style={styles.metaItem}>Type:</Text>
                     <TypeTag type={type} />
                   </View>
 
-                  <View style={styles.ratingRow}>
+                  <View style={styles.infoRow}>
                     <Text style={styles.metaItem}>Rate:</Text>
                     <Image source={starIcon} style={styles.ratingIcon} />
                     <Text style={styles.metaItem}>{rating !== '-' ? `${rating}/10` : '-'}</Text>
                   </View>
 
-                  <View style={styles.calendarRow}>
+                  <View style={styles.infoRow}>
                     <Text style={styles.metaItem}>Date:</Text>
                     <Image source={calendarIcon} style={styles.calendarIcon} />
                     <Text style={styles.metaItem}>{date}</Text>
@@ -212,7 +212,6 @@ export default function EntryDetailScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-
       <Navbar />
     </View>
   );
@@ -225,13 +224,13 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    padding: 16,
     paddingBottom: 16,
   },
 
   info: {
     padding: 16,
     backgroundColor: '#D9DCE3',
-    margin: 16,
     borderRadius: 10,
   },
 
@@ -244,12 +243,14 @@ const styles = StyleSheet.create({
   meta: {
     marginBottom: 20,
     flexDirection: 'row',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: 16,
   },
 
   metaText: {
-    marginLeft: 16,
-    display: 'flex',
-    //justifyContent: 'space-between',
+    flex: 1,
+    minWidth: 150,
   },
 
   metaItem: {
@@ -257,24 +258,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  typeRow: {
+  infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 4,
-  },
-
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-
-  calendarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     marginBottom: 4,
   },
 
@@ -293,7 +281,7 @@ const styles = StyleSheet.create({
   thoughts: {
     padding: 16,
     backgroundColor: '#D9DCE3',
-    margin: 16,
+    marginTop: 16,
     borderRadius: 10,
   },
 
@@ -304,8 +292,10 @@ const styles = StyleSheet.create({
   },
 
   imageContainer: {
-    width: 100,
-    height: 140,
+    width: '32%',
+    maxWidth: 120,
+    minWidth: 88,
+    aspectRatio: 5 / 7,
   },
 
   image: {
@@ -329,12 +319,14 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.s,
   },
   editDelete: {
-    marginHorizontal: 20,
+    marginTop: 16,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
   editButton: {
     flex: 1,
+    minWidth: 120,
     backgroundColor: '#5A6FB2',
     borderRadius: 10,
     paddingVertical: 12,
@@ -342,6 +334,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     flex: 1,
+    minWidth: 120,
     backgroundColor: '#B45151',
     borderRadius: 10,
     paddingVertical: 12,

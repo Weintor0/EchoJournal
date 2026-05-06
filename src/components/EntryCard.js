@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { FontSizes } from "../constants/typography";
 import TypeTag from "./TypeTag";
 
@@ -12,6 +12,8 @@ const CARD_IMAGE_HEIGHT = 100;
 
 export default function EntryCard({ entry, onPress, onDelete }) {
   const safeEntry = entry ?? {};
+  const { width } = useWindowDimensions();
+  const isCompact = width < 380;
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const imageUrl =
@@ -49,8 +51,8 @@ export default function EntryCard({ entry, onPress, onDelete }) {
 
   return (
     <>
-      <TouchableOpacity style={styles.card} onPress={onPress}>
-        <View style={styles.imageSection}>
+      <TouchableOpacity style={[styles.card, isCompact && styles.cardCompact]} onPress={onPress}>
+        <View style={[styles.imageSection, isCompact && styles.imageSectionCompact]}>
           <Image
             source={imageUrl ? { uri: imageUrl } : noImagePlaceholder}
             style={styles.image}
@@ -59,7 +61,7 @@ export default function EntryCard({ entry, onPress, onDelete }) {
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.title}>{safeEntry.title ?? "Untitled"}</Text>
+          <Text style={styles.title} numberOfLines={2}>{safeEntry.title ?? "Untitled"}</Text>
 
           <Text style={styles.preview} numberOfLines={2}>
             {safeEntry.note ?? "No notes yet."}
@@ -78,7 +80,7 @@ export default function EntryCard({ entry, onPress, onDelete }) {
           </View>
         </View>
 
-        <View style={styles.detailsSection}>
+        <View style={[styles.detailsSection, isCompact && styles.detailsSectionCompact]}>
           {typeof onDelete === "function" ? (
             <Pressable onPress={confirmDelete} disabled={isDeleting}>
               <Image source={deleteIcon} style={styles.deleteIcon} />
@@ -144,15 +146,23 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     minHeight: 120,
   },
+  cardCompact: {
+    flexWrap: "wrap",
+  },
   imageSection: {
-    width: CARD_IMAGE_WIDTH,
+    width: "22%",
+    maxWidth: CARD_IMAGE_WIDTH,
+    minWidth: 58,
     height: CARD_IMAGE_HEIGHT,
     paddingRight: 10,
     flexShrink: 0,
   },
+  imageSectionCompact: {
+    width: "28%",
+  },
   image: {
-    width: CARD_IMAGE_WIDTH,
-    height: CARD_IMAGE_HEIGHT,
+    width: "100%",
+    height: "100%",
     backgroundColor: "#C4C8D1",
     borderRadius: 5,
     overflow: "hidden",
@@ -162,6 +172,8 @@ const styles = StyleSheet.create({
     minHeight: CARD_IMAGE_HEIGHT,
     justifyContent: "space-between",
     paddingLeft: 6,
+    minWidth: 0,
+    flexShrink: 1,
   },
   title: {
     fontWeight: "600",
@@ -176,7 +188,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 8,
+    flexWrap: "wrap",
+    //gap: 8,
   },
   rating: {
     fontSize: FontSizes.s,
@@ -185,6 +198,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    flexShrink: 0,
   },
   ratingIcon: {
     width: 14,
@@ -201,11 +215,14 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: FontSizes.s,
+    flexShrink: 1,
   },
   dateRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    minWidth: 0,
+    flexShrink: 1,
   },
   dateIcon: {
     width: 14,
@@ -213,12 +230,25 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   detailsSection: {
-    width: 48,
+    width: "14%",
+    maxWidth: 56,
+    minWidth: 42,
     minHeight: CARD_IMAGE_HEIGHT,
     justifyContent: "space-between",
     alignItems: "flex-end",
     paddingLeft: 6,
     flexShrink: 0,
+  },
+  detailsSectionCompact: {
+    width: "100%",
+    maxWidth: "100%",
+    minHeight: 0,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: 12,
+    paddingLeft: 0,
+    paddingTop: 8,
   },
   details: {
     fontSize: FontSizes.xxs,

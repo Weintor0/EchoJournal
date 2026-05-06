@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
   },
 
   profilePictureControl: {
+    width: '100%',
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
@@ -224,14 +225,16 @@ const styles = StyleSheet.create({
   },
 
   icon: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: '38%',
+    maxWidth: 150,
+    minWidth: 96,
+    aspectRatio: 1,
+    borderRadius: 999,
   },
 
   editIcon: {
     position: 'absolute',
-    right: 0,
+    right: '30%',
     bottom: 0,
     width: 22,
     height: 22,
@@ -282,6 +285,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
@@ -298,6 +302,8 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.m,
     fontWeight: '600',
     color: '#000000',
+    flexShrink: 1,
+    textAlign: 'right',
   },
 
   statusText: {

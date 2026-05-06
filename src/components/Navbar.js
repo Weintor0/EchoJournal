@@ -23,23 +23,23 @@ export default function Navbar() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigate("/")}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigate("/")}>
         <Image source={homeIcon} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigate("/search")}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigate("/search")}>
         <Image source={searchIcon} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigate("/add")}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigate("/add")}>
         <Image source={addIcon} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigate("/journal")}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigate("/journal")}>
         <Image source={journalIcon} style={styles.icon} />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigate("/profile")}>
+      <TouchableOpacity style={styles.navItem} onPress={() => navigate("/profile")}>
         <Image source={profileIcon} style={styles.icon} />
       </TouchableOpacity>
     </View>
@@ -48,11 +48,18 @@ export default function Navbar() {
 
 const styles = StyleSheet.create({
   container: {
-    height: 50,
+    minHeight: 50,
     backgroundColor: "#5A6FB2",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
+    paddingHorizontal: "4%",
+    paddingVertical: 8,
+  },
+  navItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "20%",
   },
   icon: {
     width: 26,
