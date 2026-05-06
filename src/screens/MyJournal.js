@@ -4,7 +4,7 @@ import { parseDateValue } from "@/src/utils/date";
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { deleteEntry, getEntries } from '../api/entries';
 import EntryCard from '../components/EntryCard';
 import Header from "../components/Header";
@@ -109,13 +109,27 @@ const [minRating, setMinRating] = useState(0);
 const [maxRating, setMaxRating] = useState(10);
 const [dateFilter, setDateFilter] = useState("all");
 
+const handleMinRatingChange = (value) => {
+  setMinRating(value);
+  if (value > maxRating) {
+    setMaxRating(value);
+  }
+};
+
+const handleMaxRatingChange = (value) => {
+  setMaxRating(value);
+  if (value < minRating) {
+    setMinRating(value);
+  }
+};
+
 const filterIsActive =
   selectedTypes.length > 0 ||
   minRating > 0 ||
   maxRating < 10 ||
   dateFilter !== "all";
 
-const filterEntries = (entries) => {
+const filterEntries = React.useCallback((entries) => {
   return entries.filter((entry) => {
     // TYPE
     if (selectedTypes.length > 0 && !selectedTypes.includes(entry.type)) {
@@ -160,14 +174,14 @@ const filterEntries = (entries) => {
 
     return true;
   });
-};
+}, [selectedTypes, minRating, maxRating, dateFilter]);
 //Filter ends here
 
 //Combination of filter and sort
 const processedEntries = React.useMemo(() => {
   const filtered = filterEntries(entries);
   return sortEntries(filtered, sortField, sortDirection);
-}, [entries, selectedTypes, minRating, maxRating, dateFilter, sortField, sortDirection]);
+}, [entries, filterEntries, sortField, sortDirection]);
 
 
   useEffect(() => {
@@ -205,169 +219,172 @@ const processedEntries = React.useMemo(() => {
   return (
   <View style={styles.container}>
     <Header />
-    <ScrollView style={styles.content}>
-      <Text style={styles.header}>My Journal</Text>
-      {loading ? <Text style={styles.bodyText}>Loading your entries...</Text> : null}
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      {!loading && !error ? (
+    <FlatList
+      style={styles.list}
+      contentContainerStyle={styles.content}
+      data={!loading && !error ? processedEntries : []}
+      keyExtractor={(item) => String(item.id)}
+      ListHeaderComponent={
         <View>
-          <View style={styles.sortFilter}>  
-            <View style={styles.filterContainer}>
-              <View style={styles.filterDelete}>
+          <Text style={styles.header}>My Journal</Text>
+          {loading ? <Text style={styles.bodyText}>Loading your entries...</Text> : null}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {!loading && !error ? (
+            <View style={styles.sortFilter}>  
+              <View style={styles.filterContainer}>
+                <View style={styles.filterDelete}>
+                  <TouchableOpacity
+                    style={[styles.filterButton, filterIsActive && styles.filterButtonActive]}
+                    onPress={() => setFilterVisible(true)}
+                  >
+                    <Text style={styles.sortFilterText}>Filter</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.reset} onPress={() => {
+                    setSelectedTypes([]);
+                    setMinRating(0);
+                    setMaxRating(10);
+                    setDateFilter("all");
+                  }}>
+                    <Image source={undoIcon} style={styles.undoIcon} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.sortContainer}>
                 <TouchableOpacity
-                  style={[styles.filterButton, filterIsActive && styles.filterButtonActive]}
-                  onPress={() => setFilterVisible(true)}
+                  style={[styles.sortButtonContainer, sortField === "date" && styles.sortButtonActive]}
+                  onPress={() => handleSortPress("date")}
                 >
-                  <Text style={styles.sortFilterText}>Filter</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.reset} onPress={() => {
-                  setSelectedTypes([]);
-                  setMinRating(0);
-                  setMaxRating(10);
-                  setDateFilter("all");
-                }}>
-                  <Image source={undoIcon} style={styles.undoIcon} />
-                </TouchableOpacity>
-              </View>
-            <Modal visible={filterVisible} animationType="fade" transparent>
-              <View style={styles.modalOverlay}>
-
-               <TouchableWithoutFeedback onPress={() => setFilterVisible(false)}>
-                  <View style={StyleSheet.absoluteFillObject} />
-                </TouchableWithoutFeedback>
-
-                  <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Filter</Text>
-
-                    {/* TYPE */}
-                    <Text style={styles.sectionTitle}>Type</Text>
-                    <View style={styles.rowWrap}>
-                      {ENTRY_TYPES.map((item) => {
-                        const type = item.label;
-
-                        return (
-                          <TouchableOpacity
-                            key={type}
-                            style={[
-                              styles.chip,
-                              selectedTypes.includes(type) && styles.chipActive,
-                            ]}
-                            onPress={() => {
-                              setSelectedTypes((prev) =>
-                                prev.includes(type)
-                                  ? prev.filter((t) => t !== type)
-                                  : [...prev, type]
-                              );
-                            }}
-                          >
-                            <Text>{type}</Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-
-                    {/* RATING */}
-                    <Text style={styles.sectionTitle}>Min Rating:</Text>
-                    <RatingSlider
-                      value={minRating}
-                      onChange={setMinRating}
-                    />
-
-                    <Text style={styles.sectionTitle}>Max Rating:</Text>
-                    <RatingSlider
-                      value={maxRating}
-                      onChange={setMaxRating}
-                    />
-
-                    {/* DATE */}
-                    <Text style={styles.sectionTitle}>Date</Text>
-                    <View style={styles.rowWrap}>
-                      {[
-                        { label: "All", value: "all" },
-                        { label: "Today", value: "today" },
-                        { label: "This Month", value: "month" },
-                        { label: "3 Months", value: "3months" },
-                        { label: "This Year", value: "year" },
-                      ].map((item) => (
-                        <TouchableOpacity
-                          key={item.value}
-                          style={[
-                            styles.chip,
-                            dateFilter === item.value && styles.chipActive,
-                          ]}
-                          onPress={() => setDateFilter(item.value)}
-                        >
-                          <Text>{item.label}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                    {/* ACTIONS */}
-                    <View style={styles.modalActions}>
-                      <TouchableOpacity 
-                        onPress={() => {
-                          setSelectedTypes([]);
-                          setMinRating(0);
-                          setMaxRating(10);
-                          setDateFilter("all");
-                        }}
-                      >
-                        <Text style={styles.actionText}>Reset</Text>
-                      </TouchableOpacity>
-                    </View>
-
+                  <View style={styles.sortButtonContent}>
+                    <Text style={styles.sortFilterText}>Date</Text>
+                    <Image source={arrowUp} style={[styles.icon, getArrowStyle("date")]} />
                   </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.sortButtonContainer, sortField === "rating" && styles.sortButtonActive]}
+                  onPress={() => handleSortPress("rating")}
+                >
+                  <View style={styles.sortButtonContent}>
+                    <Text style={styles.sortFilterText}>Rating</Text>
+                    <Image source={arrowUp} style={[styles.icon, getArrowStyle("rating")]} />
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.sortButtonContainer, sortField === "title" && styles.sortButtonActive]}
+                  onPress={() => handleSortPress("title")}
+                >
+                  <View style={styles.sortButtonContent}>
+                    <Text style={styles.sortFilterText}>A-Z</Text>
+                    <Image source={arrowUp} style={[styles.icon, getArrowStyle("title")]} />
+                  </View>
+                </TouchableOpacity>
               </View>
-            </Modal>  
             </View>
-            <View style={styles.sortContainer}>
-              <TouchableOpacity
-                style={[styles.sortButtonContainer, sortField === "date" && styles.sortButtonActive]}
-                onPress={() => handleSortPress("date")}
-              >
-                <View style={styles.sortButtonContent}>
-                  <Text style={styles.sortFilterText}>Date</Text>
-                  <Image source={arrowUp} style={[styles.icon, getArrowStyle("date")]} />
-                </View>
-              </TouchableOpacity>
+          ) : null}
+        </View>
+      }
+      ListEmptyComponent={
+        !loading && !error ? <Text style={styles.bodyText}>No entries yet.</Text> : null
+      }
+      renderItem={({ item }) => (
+        <EntryCard
+          entry={item}
+          onPress={() => handleEntryPress(item)}
+          onDelete={() => handleDeleteEntry(item.id)}
+        />
+      )}
+    />
 
-              <TouchableOpacity
-                style={[styles.sortButtonContainer, sortField === "rating" && styles.sortButtonActive]}
-                onPress={() => handleSortPress("rating")}
-              >
-                <View style={styles.sortButtonContent}>
-                  <Text style={styles.sortFilterText}>Rating</Text>
-                  <Image source={arrowUp} style={[styles.icon, getArrowStyle("rating")]} />
-                </View>
-              </TouchableOpacity>
+    <Modal visible={filterVisible} animationType="fade" transparent>
+      <View style={styles.modalOverlay}>
 
+        <TouchableWithoutFeedback onPress={() => setFilterVisible(false)}>
+          <View style={StyleSheet.absoluteFillObject} />
+        </TouchableWithoutFeedback>
+
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Filter</Text>
+
+          {/* TYPE */}
+          <Text style={styles.sectionTitle}>Type</Text>
+          <View style={styles.rowWrap}>
+            {ENTRY_TYPES.map((item) => {
+              const type = item.label;
+
+              return (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.chip,
+                    selectedTypes.includes(type) && styles.chipActive,
+                  ]}
+                  onPress={() => {
+                    setSelectedTypes((prev) =>
+                      prev.includes(type)
+                        ? prev.filter((t) => t !== type)
+                        : [...prev, type]
+                    );
+                  }}
+                >
+                  <Text>{type}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* RATING */}
+          <Text style={styles.sectionTitle}>Min Rating:</Text>
+          <RatingSlider
+            value={minRating}
+            onChange={handleMinRatingChange}
+          />
+
+          <Text style={styles.sectionTitle}>Max Rating:</Text>
+          <RatingSlider
+            value={maxRating}
+            onChange={handleMaxRatingChange}
+          />
+
+          {/* DATE */}
+          <Text style={styles.sectionTitle}>Date</Text>
+          <View style={styles.rowWrap}>
+            {[
+              { label: "All", value: "all" },
+              { label: "Today", value: "today" },
+              { label: "This Month", value: "month" },
+              { label: "3 Months", value: "3months" },
+              { label: "This Year", value: "year" },
+            ].map((item) => (
               <TouchableOpacity
-                style={[styles.sortButtonContainer, sortField === "title" && styles.sortButtonActive]}
-                onPress={() => handleSortPress("title")}
+                key={item.value}
+                style={[
+                  styles.chip,
+                  dateFilter === item.value && styles.chipActive,
+                ]}
+                onPress={() => setDateFilter(item.value)}
               >
-                <View style={styles.sortButtonContent}>
-                  <Text style={styles.sortFilterText}>A-Z</Text>
-                  <Image source={arrowUp} style={[styles.icon, getArrowStyle("title")]} />
-                </View>
+                <Text>{item.label}</Text>
               </TouchableOpacity>
-            </View>
+            ))}
           </View>
-            <FlatList
-              data={processedEntries}
-              keyExtractor={(item) => String(item.id)}
-              ListEmptyComponent={
-                <Text style={styles.bodyText}>No entries yet.</Text>
-              }
-              renderItem={({ item }) => (
-                <EntryCard
-                  entry={item}
-                  onPress={() => handleEntryPress(item)}
-                  onDelete={() => handleDeleteEntry(item.id)}
-                />
-              )}
-            />
+          {/* ACTIONS */}
+          <View style={styles.modalActions}>
+            <TouchableOpacity 
+              onPress={() => {
+                setSelectedTypes([]);
+                setMinRating(0);
+                setMaxRating(10);
+                setDateFilter("all");
+              }}
+            >
+              <Text style={styles.actionText}>Reset</Text>
+            </TouchableOpacity>
           </View>
-      ) : null}
-    </ScrollView>
+
+        </View>
+      </View>
+    </Modal>  
 
     <Navbar />
   </View>
@@ -380,9 +397,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6E6E6' 
   },
 
+  list: {
+    flex: 1,
+  },
+
   content: { 
-    flex: 1, 
-    padding: 16 
+    padding: 16,
+    paddingBottom: 24,
   },
 
   header: { 
@@ -405,11 +426,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: 10,
   },
 
   filterDelete: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: 6,
   },
 
   filterButton: {
@@ -431,7 +456,9 @@ const styles = StyleSheet.create({
 
   modalContent: {
     backgroundColor: "#E6E6E6",
-    margin: 20,
+    width: "90%",
+    maxWidth: 520,
+    alignSelf: "center",
     borderRadius: 12,
     padding: 20,
   },
@@ -480,7 +507,10 @@ const styles = StyleSheet.create({
 
   sortContainer: {
     flexDirection: "row",
-    justifyContent: "end",
+    justifyContent: "flex-end",
+    flexWrap: "wrap",
+    gap: 4,
+    flex: 1,
     marginBottom: 10,
   },
 
@@ -488,7 +518,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#D9DCE3",
     paddingVertical: 6,
     paddingHorizontal: 12,
-    marginLeft: 4,
     borderRadius: 16,
   },
 

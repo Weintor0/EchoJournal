@@ -17,6 +17,7 @@ export default function TypeTag({ type, style, textStyle }) {
 const styles = StyleSheet.create({
   tag: {
     alignSelf: 'flex-start',
+    maxWidth: '100%',
     borderRadius: 999,
     backgroundColor: '#E6E6E6',
     borderWidth: 1,
@@ -28,5 +29,6 @@ const styles = StyleSheet.create({
     color: '#2F3542',
     fontSize: FontSizes.xs,
     fontWeight: '600',
+    flexShrink: 1,
   },
 });

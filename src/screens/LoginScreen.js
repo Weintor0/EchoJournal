@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -36,7 +37,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Header />
-      <View style={styles.login}>
+      <ScrollView contentContainerStyle={styles.login} keyboardShouldPersistTaps="handled">
         <View style={styles.form}>
           <Text style={styles.title}>Login</Text>
 
@@ -70,7 +71,7 @@ export default function LoginScreen() {
             <Text style={styles.linkText}>Create an account</Text>
           </Pressable>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -81,8 +82,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6E6E6',
   },
   login: {
-    flex: 1,
-    marginTop: 50,
+    flexGrow: 1,
+    justifyContent: 'center',
     padding: 20,
   },
   form: {
@@ -90,6 +91,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 10,
     padding: 16,
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
   },
   title: {
     fontSize: FontSizes.xxl,

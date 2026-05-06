@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   recent: {
     backgroundColor: '#D9DCE3',  
     borderRadius: 10,
-    padding: 4,
+    padding: 8,
   },
 
   hello: {
@@ -161,13 +161,14 @@ const styles = StyleSheet.create({
 
   bodyText: {
     fontSize: FontSizes.m,
+    flexShrink: 1,
   },
 
   stats: {
     marginTop: 20,
     backgroundColor: '#D9DCE3',  
     borderRadius: 10,
-    padding: 4,
+    padding: 8,
     fontSize: FontSizes.s,
     
   },
@@ -175,6 +176,9 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
     marginBottom: 5,
     paddingVertical: 10,
     borderBottomWidth: 1,
@@ -190,5 +194,7 @@ const styles = StyleSheet.create({
   statValue: {  
     fontWeight: "600",
     fontSize: FontSizes.m,
+    flexShrink: 1,
+    textAlign: "right",
   },
 });
