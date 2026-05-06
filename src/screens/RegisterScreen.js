@@ -92,12 +92,12 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#E6E6E6',
   },
   register: {
-    flex: 1,
-    marginTop: 50,
+    flexGrow: 1,
+    justifyContent: 'center',
     padding: 20,
   },
   form: {
@@ -105,6 +105,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     justifyContent: 'center',
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
   },
 
   title: {
