@@ -5,6 +5,7 @@ import RatingSlider from "@/src/components/RatingSlider";
 import TypeTag from '@/src/components/TypeTag';
 import { ENTRY_TYPES } from '@/src/constants/entryTypes';
 import { FontSizes } from '@/src/constants/typography';
+import { useLanguage } from '@/src/hooks/useLanguage';
 import { parseDateValue } from "@/src/utils/date";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
@@ -83,6 +84,7 @@ export default function AddScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [isLoadingEntry, setIsLoadingEntry] = useState(isEditMode);
+  const { t } = useLanguage();
 
   const parsedRating = Number.parseFloat(rating.replace(',', '.'));
   const sliderValue = Number.isNaN(parsedRating) ? 0 : Math.max(0, Math.min(10, parsedRating));
@@ -113,7 +115,6 @@ export default function AddScreen() {
         setDate(entry?.date?.trim() ? entry.date : '');
         setImageUrl(entry?.imageUrl?.trim() ? entry.imageUrl : '');
         setNote(entry?.note ?? '');
-        setCalendarMonth(parseDateValue(entry?.date) ?? new Date());
       } catch (loadError) {
         if (isActive) {
           setError(loadError.message);
@@ -159,7 +160,7 @@ export default function AddScreen() {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (!permission.granted) {
-        setError('Media library permission is required to upload an image.');
+        setError(t('mediaPermissionRequired'));
         return;
       }
 
@@ -174,7 +175,7 @@ export default function AddScreen() {
       const asset = result.assets?.[0];
 
       if (!asset?.uri) {
-        setError('The selected image could not be processed.');
+        setError(t('imageProcessError'));
         return;
       }
 
@@ -190,14 +191,14 @@ export default function AddScreen() {
       );
 
       if (!processedImage.base64) {
-        setError('The selected image could not be processed.');
+        setError(t('imageProcessError'));
         return;
       }
 
       setImageUrl(`data:image/jpeg;base64,${processedImage.base64}`);
       setError('');
     } catch {
-      setError('The selected image could not be processed.');
+      setError(t('imageProcessError'));
     }
   }
 
@@ -205,7 +206,7 @@ export default function AddScreen() {
     const trimmedTitle = title.trim();
 
     if (!trimmedTitle) {
-      setError('Title is required.');
+      setError(t('titleRequired'));
       return;
     }
 
@@ -263,8 +264,8 @@ export default function AddScreen() {
     }
   }
 
-  const screenTitle = isEditMode ? 'Edit Entry' : 'Add Entry';
-  const submitLabel = isEditMode ? 'Save Changes' : 'Create Entry';
+  const screenTitle = isEditMode ? t('editEntry') : t('addEntry');
+  const submitLabel = isEditMode ? t('saveChanges') : t('createEntry');
 
   return (
     <View style={styles.container}>
@@ -282,20 +283,20 @@ export default function AddScreen() {
         >
           <View style={styles.info}>
             <Text style={styles.title}>{screenTitle}</Text>
-            {isLoadingEntry ? <Text style={styles.helperText}>Loading entry...</Text> : null}
+            {isLoadingEntry ? <Text style={styles.helperText}>{t('loadingEntry')}</Text> : null}
             <View style={styles.section}>
-              <Text style={styles.fieldLabel}>Title</Text>
+              <Text style={styles.fieldLabel}>{t('title')}</Text>
               <TextInput
                 value={title}
                 onChangeText={setTitle}
-                placeholder="Title"
+                placeholder={t('title')}
                 style={styles.input}
               />
             </View>
             <View style={styles.section}>
               <View style={styles.metaRow}>
                 <View style={styles.metaInput}>
-                  <Text style={styles.fieldLabel}>Type</Text>
+                  <Text style={styles.fieldLabel}>{t('type')}</Text>
                   <View style={styles.typeList}>
                     {ENTRY_TYPES.map((entryType) => {
                       const isSelected = entryType.label === type;
@@ -319,17 +320,17 @@ export default function AddScreen() {
               </View>
             </View>
             <View style={styles.section}>
-              <Text style={styles.fieldLabel}>Rating</Text>
+              <Text style={styles.fieldLabel}>{t('rating')}</Text>
               <RatingSlider
                 value={sliderValue}
                 onChange={setRatingFromSlider}
               />
             </View>
             <View style={styles.section}>
-              <Text style={styles.fieldLabel}>Date</Text>
+              <Text style={styles.fieldLabel}>{t('date')}</Text>
               <Pressable style={styles.input} onPress={openDatePicker}>
                 <Text style={date ? styles.dateText : styles.datePlaceholder}>
-                  {date || 'Pick a date'}
+                  {date || t('pickDate')}
                 </Text>
               </Pressable>
               {isDatePickerVisible ? (
@@ -343,26 +344,26 @@ export default function AddScreen() {
               ) : null}
             </View>
             <View style={styles.section}>
-              <Text style={styles.fieldLabel}>Cover Image</Text>
+              <Text style={styles.fieldLabel}>{t('coverImage')}</Text>
               <Pressable style={styles.uploadButton} onPress={handlePickImage}>
-                <Text style={styles.uploadButtonText}>Upload From Gallery</Text>
+                <Text style={styles.uploadButtonText}>{t('uploadFromGallery')}</Text>
               </Pressable>
               <Image
                 source={imageUrl ? { uri: imageUrl } : noImagePlaceholder}
                 style={styles.previewImage}
                 resizeMode={imageUrl ? 'cover' : 'contain'}
               />
-              {!imageUrl ? <Text style={styles.helperText}>No image selected yet.</Text> : null}
+              {!imageUrl ? <Text style={styles.helperText}>{t('noImageSelected')}</Text> : null}
             </View>
           </View>
 
 
           <View style={styles.thoughts}>
-            <Text style={styles.sectionTitle}>My Thoughts</Text>
+            <Text style={styles.sectionTitle}>{t('myThoughts')}</Text>
             <TextInput
               value={note}
               onChangeText={setNote}
-              placeholder="Write your thoughts..."
+              placeholder={t('writeThoughts')}
               multiline
               textAlignVertical="top"
               style={[
@@ -380,7 +381,7 @@ export default function AddScreen() {
             disabled={isSubmitting || isLoadingEntry}
           >
             <Text style={styles.buttonText}>
-              {isSubmitting ? 'Saving...' : submitLabel}
+              {isSubmitting ? t('saving') : submitLabel}
             </Text>
           </Pressable>
         </ScrollView>

@@ -11,6 +11,7 @@ import Header from "../components/Header";
 import Navbar from '../components/Navbar';
 import { ENTRY_TYPES } from "../constants/entryTypes";
 import { FontSizes } from '../constants/typography';
+import { useLanguage } from '../hooks/useLanguage';
 
 const arrowUp = require('../assets/icons/up-arrow.png');
 const undoIcon = require('../assets/icons/undo.png');
@@ -21,6 +22,7 @@ export default function MyJournalScreen() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { getEntryTypeLabel, t } = useLanguage();
 
   const handleEntryPress = (entry) => {
     router.push({
@@ -226,8 +228,8 @@ const processedEntries = React.useMemo(() => {
       keyExtractor={(item) => String(item.id)}
       ListHeaderComponent={
         <View>
-          <Text style={styles.header}>My Journal</Text>
-          {loading ? <Text style={styles.bodyText}>Loading your entries...</Text> : null}
+          <Text style={styles.header}>{t('myJournal')}</Text>
+          {loading ? <Text style={styles.bodyText}>{t('loadingYourEntries')}</Text> : null}
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
           {!loading && !error ? (
             <View style={styles.sortFilter}>  
@@ -237,7 +239,7 @@ const processedEntries = React.useMemo(() => {
                     style={[styles.filterButton, filterIsActive && styles.filterButtonActive]}
                     onPress={() => setFilterVisible(true)}
                   >
-                    <Text style={styles.sortFilterText}>Filter</Text>
+                    <Text style={styles.sortFilterText}>{t('filter')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.reset} onPress={() => {
                     setSelectedTypes([]);
@@ -255,7 +257,7 @@ const processedEntries = React.useMemo(() => {
                   onPress={() => handleSortPress("date")}
                 >
                   <View style={styles.sortButtonContent}>
-                    <Text style={styles.sortFilterText}>Date</Text>
+                    <Text style={styles.sortFilterText}>{t('date')}</Text>
                     <Image source={arrowUp} style={[styles.icon, getArrowStyle("date")]} />
                   </View>
                 </TouchableOpacity>
@@ -265,7 +267,7 @@ const processedEntries = React.useMemo(() => {
                   onPress={() => handleSortPress("rating")}
                 >
                   <View style={styles.sortButtonContent}>
-                    <Text style={styles.sortFilterText}>Rating</Text>
+                    <Text style={styles.sortFilterText}>{t('rating')}</Text>
                     <Image source={arrowUp} style={[styles.icon, getArrowStyle("rating")]} />
                   </View>
                 </TouchableOpacity>
@@ -285,7 +287,7 @@ const processedEntries = React.useMemo(() => {
         </View>
       }
       ListEmptyComponent={
-        !loading && !error ? <Text style={styles.bodyText}>No entries yet.</Text> : null
+        !loading && !error ? <Text style={styles.bodyText}>{t('noEntriesYet')}</Text> : null
       }
       renderItem={({ item }) => (
         <EntryCard
@@ -304,10 +306,10 @@ const processedEntries = React.useMemo(() => {
         </TouchableWithoutFeedback>
 
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Filter</Text>
+          <Text style={styles.modalTitle}>{t('filter')}</Text>
 
           {/* TYPE */}
-          <Text style={styles.sectionTitle}>Type</Text>
+          <Text style={styles.sectionTitle}>{t('type')}</Text>
           <View style={styles.rowWrap}>
             {ENTRY_TYPES.map((item) => {
               const type = item.label;
@@ -327,34 +329,34 @@ const processedEntries = React.useMemo(() => {
                     );
                   }}
                 >
-                  <Text>{type}</Text>
+                  <Text>{getEntryTypeLabel(type)}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
 
           {/* RATING */}
-          <Text style={styles.sectionTitle}>Min Rating:</Text>
+          <Text style={styles.sectionTitle}>{t('minRating')}</Text>
           <RatingSlider
             value={minRating}
             onChange={handleMinRatingChange}
           />
 
-          <Text style={styles.sectionTitle}>Max Rating:</Text>
+          <Text style={styles.sectionTitle}>{t('maxRating')}</Text>
           <RatingSlider
             value={maxRating}
             onChange={handleMaxRatingChange}
           />
 
           {/* DATE */}
-          <Text style={styles.sectionTitle}>Date</Text>
+          <Text style={styles.sectionTitle}>{t('date')}</Text>
           <View style={styles.rowWrap}>
             {[
-              { label: "All", value: "all" },
-              { label: "Today", value: "today" },
-              { label: "This Month", value: "month" },
-              { label: "3 Months", value: "3months" },
-              { label: "This Year", value: "year" },
+              { label: t("all"), value: "all" },
+              { label: t("today"), value: "today" },
+              { label: t("thisMonth"), value: "month" },
+              { label: t("threeMonths"), value: "3months" },
+              { label: t("thisYear"), value: "year" },
             ].map((item) => (
               <TouchableOpacity
                 key={item.value}
@@ -371,7 +373,7 @@ const processedEntries = React.useMemo(() => {
           {/* ACTIONS */}
           <View style={styles.modalActions}>
             <TouchableOpacity onPress={() => setFilterVisible(false)}>
-              <Text style={styles.actionText}>Apply</Text>
+              <Text style={styles.actionText}>{t('apply')}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => {
@@ -381,7 +383,7 @@ const processedEntries = React.useMemo(() => {
                 setDateFilter("all");
               }}
             >
-              <Text style={styles.actionText}>Reset</Text>
+              <Text style={styles.actionText}>{t('reset')}</Text>
             </TouchableOpacity>
           </View>
 

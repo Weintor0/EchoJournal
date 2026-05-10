@@ -8,6 +8,7 @@ import EntryCard from "../components/EntryCard";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import { FontSizes } from "../constants/typography";
+import { useLanguage } from "../hooks/useLanguage";
 import { getEntryStats } from "../utils/entryStats";
 
 export default function HomeScreen() {
@@ -17,6 +18,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const { getEntryTypeLabel, t } = useLanguage();
 
   const handleEntryPress = (entry) => {
     router.push({
@@ -72,25 +74,25 @@ export default function HomeScreen() {
 
   const recentEntries = entries.slice(0, 5);
   const stats = getEntryStats(entries);
-  const displayName = currentUser?.name?.trim() || "there";
+  const displayName = currentUser?.name?.trim() || t("fallbackName");
 
   return (
     <View style={styles.container}>
       <Header />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.hello}>
-          <Text style={styles.helloText}>Hello, {displayName || "there"}!</Text>
+          <Text style={styles.helloText}>{t("hello", { name: displayName })}</Text>
         </View>
         <TouchableOpacity style={styles.recent} onPress={() => router.replace("/journal")}>
-          <Text style={styles.sectionTitle}>Recent Entries</Text>
+          <Text style={styles.sectionTitle}>{t("recentEntries")}</Text>
 
-          {loading ? <Text style={styles.bodyText}>Loading recent entries...</Text> : null}
+          {loading ? <Text style={styles.bodyText}>{t("loadingRecentEntries")}</Text> : null}
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
           {!loading && !error ? (
             <FlatList
               data={recentEntries}
               keyExtractor={(item) => String(item.id)}
-              ListEmptyComponent={<Text style={styles.bodyText}>No entries yet.</Text>}
+              ListEmptyComponent={<Text style={styles.bodyText}>{t("noEntriesYet")}</Text>}
               scrollEnabled={false}
               renderItem={({ item }) => (
                 <EntryCard
@@ -104,21 +106,21 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.stats} onPress={() => router.replace("/profile")}>
-          <Text style={styles.sectionTitle}>My Stats</Text>
+          <Text style={styles.sectionTitle}>{t("myStats")}</Text>
 
           <View style={styles.statsRow}>
-            <Text style={styles.bodyText}>Most Used Type</Text>
-            <Text style={styles.statValue}>{stats.mostUsedType}</Text>
+            <Text style={styles.bodyText}>{t("mostUsedType")}</Text>
+            <Text style={styles.statValue}>{getEntryTypeLabel(stats.mostUsedType)}</Text>
           </View>
 
           <View style={styles.statsRow}>
-            <Text style={styles.bodyText}>Entries This Week</Text>
+            <Text style={styles.bodyText}>{t("entriesThisWeek")}</Text>
             <Text style={styles.statValue}>{stats.entriesThisWeek}</Text>
           </View>
 
           <View style={styles.statsRow}>
-            <Text style={styles.bodyText}>Streak</Text>
-            <Text style={styles.statValue}>{stats.currentStreak} Days</Text>
+            <Text style={styles.bodyText}>{t("streak")}</Text>
+            <Text style={styles.statValue}>{stats.currentStreak} {t("days")}</Text>
           </View>
         </TouchableOpacity>
       </ScrollView>

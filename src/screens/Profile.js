@@ -11,19 +11,20 @@ import profileIcon from "../assets/icons/profile.png";
 import Header from "../components/Header";
 import Navbar from '../components/Navbar';
 import { FontSizes } from '../constants/typography';
+import { useLanguage } from '../hooks/useLanguage';
 import { getEntryStats } from '../utils/entryStats';
 
 const PROFILE_STATS = [
-  { label: 'Most Used Entry Type', key: 'mostUsedType' },
-  { label: 'Entries Added This Week', key: 'entriesThisWeek' },
-  { label: 'Current Streak', key: 'currentStreak', suffix: ' Days' },
-  { label: 'Longest Streak Ever', key: 'longestStreak', suffix: ' Days' },
-  { label: 'Average Rating', key: 'averageRating' },
-  { label: 'Total Number of Entries', key: 'totalEntries' },
-  { label: 'Total Entries This Month', key: 'entriesThisMonth' },
-  { label: 'Entries Added Today', key: 'entriesToday' },
-  { label: 'Most Frequently Used Rating', key: 'mostFrequentRating' },
-  { label: 'Highest Rated Category', key: 'highestRatedCategory' },
+  { labelKey: 'profileMostUsedEntryType', key: 'mostUsedType', isType: true },
+  { labelKey: 'profileEntriesAddedThisWeek', key: 'entriesThisWeek' },
+  { labelKey: 'profileCurrentStreak', key: 'currentStreak', suffixKey: 'days' },
+  { labelKey: 'profileLongestStreakEver', key: 'longestStreak', suffixKey: 'days' },
+  { labelKey: 'profileAverageRating', key: 'averageRating' },
+  { labelKey: 'profileTotalNumberOfEntries', key: 'totalEntries' },
+  { labelKey: 'profileTotalEntriesThisMonth', key: 'entriesThisMonth' },
+  { labelKey: 'profileEntriesAddedToday', key: 'entriesToday' },
+  { labelKey: 'profileMostFrequentlyUsedRating', key: 'mostFrequentRating' },
+  { labelKey: 'profileHighestRatedCategory', key: 'highestRatedCategory', isType: true },
 ];
 
 const PROFILE_IMAGE_SIZE = 500;
@@ -36,6 +37,7 @@ export default function ProfileScreen() {
   const [error, setError] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [profilePictureError, setProfilePictureError] = useState('');
+  const { getEntryTypeLabel, t } = useLanguage();
 
   useEffect(() => {
     let isActive = true;
@@ -100,14 +102,14 @@ export default function ProfileScreen() {
       setProfilePictureError('');
 
       if (!currentUser?.id) {
-        setProfilePictureError('Please log in before adding a profile picture.');
+        setProfilePictureError(t('loginBeforeProfilePicture'));
         return;
       }
 
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (!permission.granted) {
-        setProfilePictureError('Media library permission is required to add a profile picture.');
+        setProfilePictureError(t('profilePicturePermissionRequired'));
         return;
       }
 
@@ -123,7 +125,7 @@ export default function ProfileScreen() {
       const selectedAsset = result.assets?.[0];
 
       if (!selectedAsset?.uri) {
-        setProfilePictureError('The selected profile picture could not be processed.');
+        setProfilePictureError(t('profilePictureProcessError'));
         return;
       }
 
@@ -138,7 +140,7 @@ export default function ProfileScreen() {
       );
 
       if (!processedImage.base64) {
-        setProfilePictureError('The selected profile picture could not be processed.');
+        setProfilePictureError(t('profilePictureProcessError'));
         return;
       }
 
@@ -148,7 +150,7 @@ export default function ProfileScreen() {
       );
       setCurrentUser(updatedUser);
     } catch {
-      setProfilePictureError('The selected profile picture could not be saved.');
+      setProfilePictureError(t('profilePictureSaveError'));
     }
   }
 
@@ -162,7 +164,12 @@ export default function ProfileScreen() {
   const hasProfilePicture = Boolean(profilePicture);
   const displayName = currentUser
     ? `${currentUser.name} ${currentUser.surname}`.trim()
-    : 'User Name';
+    : t('userName');
+
+  function getStatValue(item) {
+    const value = item.isType ? getEntryTypeLabel(stats[item.key]) : stats[item.key];
+    return `${value}${item.suffixKey ? ` ${t(item.suffixKey)}` : ''}`;
+  }
 
   return (
     <View style={styles.container}>
@@ -180,19 +187,19 @@ export default function ProfileScreen() {
         ) : null}
         <Text style={styles.title}>{displayName}</Text>
         <Pressable onPress={handleLogout}>
-          <Text style={styles.logout}>Log Out</Text>
+          <Text style={styles.logout}>{t('logOut')}</Text>
         </Pressable>
 
         <View style={styles.statsContainer}>
-          <Text style={styles.statsTitle}>Stats</Text>
-          {loading ? <Text style={styles.statusText}>Loading stats...</Text> : null}
+          <Text style={styles.statsTitle}>{t('stats')}</Text>
+          {loading ? <Text style={styles.statusText}>{t('loadingStats')}</Text> : null}
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
           {!loading && !error
             ? PROFILE_STATS.map((item) => (
                 <View key={item.key} style={styles.statRow}>
-                  <Text style={styles.statLabel}>{item.label}</Text>
+                  <Text style={styles.statLabel}>{t(item.labelKey)}</Text>
                   <Text style={styles.statValue}>
-                    {`${stats[item.key]}${item.suffix ?? ''}`}
+                    {getStatValue(item)}
                   </Text>
                 </View>
               ))

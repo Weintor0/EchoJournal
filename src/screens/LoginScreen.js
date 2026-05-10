@@ -11,6 +11,7 @@ import {
 import { loginUser } from '../api/auth';
 import Header from "../components/Header";
 import { FontSizes } from '../constants/typography';
+import { useLanguage } from '../hooks/useLanguage';
 
 
 
@@ -20,6 +21,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useLanguage();
 
   async function handleLogin() {
     try {
@@ -39,12 +41,12 @@ export default function LoginScreen() {
       <Header />
       <ScrollView contentContainerStyle={styles.login} keyboardShouldPersistTaps="handled">
         <View style={styles.form}>
-          <Text style={styles.title}>Login</Text>
+          <Text style={styles.title}>{t('login')}</Text>
 
           <TextInput
             value={email}
             onChangeText={setEmail}
-            placeholder="Email"
+            placeholder={t('email')}
             autoCapitalize="none"
             keyboardType="email-address"
             style={styles.input}
@@ -52,7 +54,7 @@ export default function LoginScreen() {
           <TextInput
             value={password}
             onChangeText={setPassword}
-            placeholder="Password"
+            placeholder={t('password')}
             secureTextEntry
             style={styles.input}
           />
@@ -64,11 +66,11 @@ export default function LoginScreen() {
             onPress={handleLogin}
             disabled={isSubmitting}
           >
-            <Text style={styles.buttonText}>{isSubmitting ? 'Logging in...' : 'Login'}</Text>
+            <Text style={styles.buttonText}>{isSubmitting ? t('loggingIn') : t('login')}</Text>
           </Pressable>
 
           <Pressable onPress={() => router.push('/register')}>
-            <Text style={styles.linkText}>Create an account</Text>
+            <Text style={styles.linkText}>{t('createAccount')}</Text>
           </Pressable>
         </View>
       </ScrollView>
