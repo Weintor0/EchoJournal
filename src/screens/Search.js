@@ -7,6 +7,7 @@ import EntryCard from '../components/EntryCard';
 import Header from "../components/Header";
 import Navbar from '../components/Navbar';
 import { FontSizes } from '../constants/typography';
+import { useLanguage } from '../hooks/useLanguage';
 
 const searchIcon = require('../assets/icons/search.png');
 
@@ -18,6 +19,7 @@ export default function SearchScreen() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { t } = useLanguage();
 
   useEffect(() => {
     let isActive = true;
@@ -79,7 +81,7 @@ export default function SearchScreen() {
         <View style={styles.searchBar}>
           <Image source={searchIcon} style={styles.searchIcon} />
           <TextInput
-            placeholder="Search entries..."
+            placeholder={t('searchEntries')}
             value={query}
             onChangeText={setQuery}
             style={styles.input}
@@ -88,7 +90,7 @@ export default function SearchScreen() {
             clearButtonMode="while-editing"
           />
         </View>
-        {loading ? <Text style={styles.bodyText}>Loading entries...</Text> : null}
+        {loading ? <Text style={styles.bodyText}>{t('loadingEntries')}</Text> : null}
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
         {!loading && !error ? (
           <FlatList

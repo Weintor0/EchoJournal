@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { FontSizes } from "../constants/typography";
+import { useLanguage } from "../hooks/useLanguage";
 import TypeTag from "./TypeTag";
 
 const starIcon = require("../assets/icons/star.png");
@@ -13,6 +14,7 @@ const CARD_IMAGE_HEIGHT = 100;
 export default function EntryCard({ entry, onPress, onDelete }) {
   const safeEntry = entry ?? {};
   const { width } = useWindowDimensions();
+  const { t } = useLanguage();
   const isCompact = width < 380;
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -61,10 +63,10 @@ export default function EntryCard({ entry, onPress, onDelete }) {
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.title} numberOfLines={2}>{safeEntry.title ?? "Untitled"}</Text>
+          <Text style={styles.title} numberOfLines={2}>{safeEntry.title ?? t("untitled")}</Text>
 
           <Text style={styles.preview} numberOfLines={2}>
-            {safeEntry.note ?? "No notes yet."}
+            {safeEntry.note ?? t("noNotesYet")}
           </Text>
 
           <View style={styles.footer}>
@@ -88,7 +90,7 @@ export default function EntryCard({ entry, onPress, onDelete }) {
           ) : (
             <View style={styles.deleteIconSpacer} />
           )}
-          <Text style={styles.details}>{"Details"}</Text>
+          <Text style={styles.details}>{t("details")}</Text>
         </View>
       </TouchableOpacity>
 
@@ -107,9 +109,9 @@ export default function EntryCard({ entry, onPress, onDelete }) {
           }}
         >
           <Pressable style={styles.deleteModal} onPress={() => {}}>
-            <Text style={styles.deleteModalTitle}>Delete entry?</Text>
+            <Text style={styles.deleteModalTitle}>{t("deleteEntry")}</Text>
             <Text style={styles.deleteModalText}>
-              This will permanently remove this entry.
+              {t("deleteEntryDescription")}
             </Text>
             <View style={styles.deleteModalActions}>
               <Pressable
@@ -117,7 +119,7 @@ export default function EntryCard({ entry, onPress, onDelete }) {
                 onPress={() => setIsDeleteModalVisible(false)}
                 disabled={isDeleting}
               >
-                <Text style={styles.actionButtonText}>Cancel</Text>
+                <Text style={styles.actionButtonText}>{t("cancel")}</Text>
               </Pressable>
               <Pressable
                 style={[styles.deleteButton, isDeleting && styles.actionButtonDisabled]}
@@ -125,7 +127,7 @@ export default function EntryCard({ entry, onPress, onDelete }) {
                 disabled={isDeleting}
               >
                 <Text style={styles.actionButtonText}>
-                  {isDeleting ? "Deleting..." : "Delete"}
+                  {isDeleting ? t("deleting") : t("delete")}
                 </Text>
               </Pressable>
             </View>

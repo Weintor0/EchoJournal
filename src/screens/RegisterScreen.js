@@ -13,6 +13,7 @@ import {
 import { registerUser } from '../api/auth';
 import Header from "../components/Header";
 import { FontSizes } from '../constants/typography';
+import { useLanguage } from '../hooks/useLanguage';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -23,22 +24,23 @@ export default function RegisterScreen() {
   const [repeatPassword, setRepeatPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useLanguage();
 
   function validatePassword(value) {
     if (value.length < 8) {
-      return 'Password must be at least 8 characters long.';
+      return t('passwordLength');
     }
 
     if (!/[A-Z]/.test(value)) {
-      return 'Password must contain at least one uppercase letter.';
+      return t('passwordUppercase');
     }
 
     if (!/[a-z]/.test(value)) {
-      return 'Password must contain at least one lowercase letter.';
+      return t('passwordLowercase');
     }
 
     if (!/[0-9]/.test(value)) {
-      return 'Password must contain at least one number.';
+      return t('passwordNumber');
     }
 
     return '';
@@ -53,7 +55,7 @@ export default function RegisterScreen() {
     }
 
     if (password !== repeatPassword) {
-      setError('Passwords do not match.');
+      setError(t('passwordsDoNotMatch'));
       return;
     }
 
@@ -82,42 +84,42 @@ export default function RegisterScreen() {
         <Header />
         <View style={styles.register}>
           <View style={styles.form}>
-            <Text style={styles.title}>Register</Text>
+            <Text style={styles.title}>{t('register')}</Text>
 
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder="Name"
+              placeholder={t('name')}
               style={styles.input}
             />
             <TextInput
               value={surname}
               onChangeText={setSurname}
-              placeholder="Surname"
+              placeholder={t('surname')}
               style={styles.input}
             />
             <TextInput
               value={email}
               onChangeText={setEmail}
-              placeholder="Email"
+              placeholder={t('email')}
               autoCapitalize="none"
               keyboardType="email-address"
               style={styles.input}
             />
             <Text style={styles.passwordNotice}>
-              Password must be at least 8 characters and include uppercase, lowercase, and a number.
+              {t('passwordNotice')}
             </Text>
             <TextInput
               value={password}
               onChangeText={setPassword}
-              placeholder="Password"
+              placeholder={t('password')}
               secureTextEntry
               style={styles.input}
             />
             <TextInput
               value={repeatPassword}
               onChangeText={setRepeatPassword}
-              placeholder="Repeat password"
+              placeholder={t('repeatPassword')}
               secureTextEntry
               style={styles.input}
             />
@@ -130,12 +132,12 @@ export default function RegisterScreen() {
               disabled={isSubmitting}
             >
               <Text style={styles.buttonText}>
-                {isSubmitting ? 'Creating account...' : 'Register'}
+                {isSubmitting ? t('creatingAccount') : t('register')}
               </Text>
             </Pressable>
 
             <Pressable onPress={() => router.push('/login')}>
-              <Text style={styles.linkText}>Already have an account?</Text>
+              <Text style={styles.linkText}>{t('alreadyHaveAccount')}</Text>
             </Pressable>
           </View>
         </View>

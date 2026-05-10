@@ -1,29 +1,16 @@
 import { deleteEntry, getEntryById } from '@/src/api/entries';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Image, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Header from '../components/Header';
 import Navbar from '../components/Navbar';
 import TypeTag from '../components/TypeTag';
 import { FontSizes } from '../constants/typography';
+import { useLanguage } from '../hooks/useLanguage';
 
 const starIcon = require('../assets/icons/star.png');
 const calendarIcon = require('../assets/icons/calendar.png');
 const noImagePlaceholder = require('../assets/no-image.png');
-const NOTE_COLORS = ['#000000', '#1D4ED8', '#B00020'];
-const NOTE_FONTS = ['default', 'serif', 'mono'];
-
-function getNoteFontFamily(noteFont) {
-  if (noteFont === 'serif') {
-    return Platform.select({ ios: 'Georgia', android: 'serif', default: 'serif' });
-  }
-
-  if (noteFont === 'mono') {
-    return Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' });
-  }
-
-  return undefined;
-}
 
 export default function EntryDetailScreen() {
   const router = useRouter();
@@ -34,13 +21,14 @@ export default function EntryDetailScreen() {
   const [error, setError] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     let isActive = true;
 
     async function loadEntry() {
       if (!entryId) {
-        setError('Entry id is missing.');
+        setError(t('entryIdMissing'));
         setLoading(false);
         return;
       }
@@ -69,19 +57,19 @@ export default function EntryDetailScreen() {
     return () => {
       isActive = false;
     };
-  }, [entryId]);
+  }, [entryId, t]);
 
-  const title = entry?.title ?? 'Untitled';
+  const title = entry?.title ?? t('untitled');
   const type = entry?.type ?? '-';
   const rating =
     entry?.rating != null && String(entry.rating).trim() ? String(entry.rating) : '-';
   const date = entry?.date?.trim() ? entry.date : '-';
   const imageUrl = entry?.imageUrl?.trim() ? entry.imageUrl : '';
-  const note = entry?.note?.trim() ? entry.note : 'No notes yet.';
+  const note = entry?.note?.trim() ? entry.note : t('noNotesYet');
 
   function handleEditPress() {
     if (!entryId) {
-      setError('Entry id is missing.');
+      setError(t('entryIdMissing'));
       return;
     }
 
@@ -102,7 +90,7 @@ export default function EntryDetailScreen() {
 
   async function handleDeletePress() {
     if (!entryId) {
-      setError('Entry id is missing.');
+      setError(t('entryIdMissing'));
       return;
     }
 
@@ -124,7 +112,7 @@ export default function EntryDetailScreen() {
       <Header />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {loading ? <Text style={styles.statusText}>Loading entry...</Text> : null}
+        {loading ? <Text style={styles.statusText}>{t('loadingEntry')}</Text> : null}
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         {!loading && !error ? (
@@ -143,18 +131,18 @@ export default function EntryDetailScreen() {
 
                 <View style={styles.metaText}>
                   <View style={styles.infoRow}>
-                    <Text style={styles.metaItem}>Type:</Text>
+                    <Text style={styles.metaItem}>{t('type')}:</Text>
                     <TypeTag type={type} />
                   </View>
 
                   <View style={styles.infoRow}>
-                    <Text style={styles.metaItem}>Rate:</Text>
+                    <Text style={styles.metaItem}>{t('rate')}:</Text>
                     <Image source={starIcon} style={styles.ratingIcon} />
                     <Text style={styles.metaItem}>{rating !== '-' ? `${rating}/10` : '-'}</Text>
                   </View>
 
                   <View style={styles.infoRow}>
-                    <Text style={styles.metaItem}>Date:</Text>
+                    <Text style={styles.metaItem}>{t('date')}:</Text>
                     <Image source={calendarIcon} style={styles.calendarIcon} />
                     <Text style={styles.metaItem}>{date}</Text>
                   </View>
@@ -164,7 +152,7 @@ export default function EntryDetailScreen() {
             </View>
 
             <View style={styles.thoughts}>
-              <Text style={styles.sectionTitle}>My Thoughts</Text>
+              <Text style={styles.sectionTitle}>{t('myThoughts')}</Text>
               <Text
                 style={[
                   styles.metaItem
@@ -176,7 +164,7 @@ export default function EntryDetailScreen() {
 
             <View style={styles.editDelete}>
               <Pressable style={styles.editButton} onPress={handleEditPress}>
-                <Text style={styles.actionButtonText}>Edit</Text>
+                <Text style={styles.actionButtonText}>{t('edit')}</Text>
               </Pressable>
               <Pressable
                 style={[styles.deleteButton, isDeleting && styles.actionButtonDisabled]}
@@ -184,7 +172,7 @@ export default function EntryDetailScreen() {
                 disabled={isDeleting}
               >
                 <Text style={styles.actionButtonText}>
-                  {isDeleting ? 'Deleting...' : 'Delete'}
+                  {isDeleting ? t('deleting') : t('delete')}
                 </Text>
               </Pressable>
             </View>
@@ -207,9 +195,9 @@ export default function EntryDetailScreen() {
           }}
         >
           <Pressable style={styles.deleteModal} onPress={() => {}}>
-            <Text style={styles.deleteModalTitle}>Delete entry?</Text>
+            <Text style={styles.deleteModalTitle}>{t('deleteEntry')}</Text>
             <Text style={styles.deleteModalText}>
-              This will permanently remove this entry.
+              {t('deleteEntryDescription')}
             </Text>
             <View style={styles.deleteModalActions}>
               <Pressable
@@ -217,7 +205,7 @@ export default function EntryDetailScreen() {
                 onPress={() => setIsDeleteModalVisible(false)}
                 disabled={isDeleting}
               >
-                <Text style={styles.actionButtonText}>Cancel</Text>
+                <Text style={styles.actionButtonText}>{t('cancel')}</Text>
               </Pressable>
               <Pressable
                 style={[styles.deleteButton, isDeleting && styles.actionButtonDisabled]}
@@ -225,7 +213,7 @@ export default function EntryDetailScreen() {
                 disabled={isDeleting}
               >
                 <Text style={styles.actionButtonText}>
-                  {isDeleting ? 'Deleting...' : 'Delete'}
+                  {isDeleting ? t('deleting') : t('delete')}
                 </Text>
               </Pressable>
             </View>
