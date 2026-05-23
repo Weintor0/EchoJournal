@@ -21,6 +21,7 @@ db.serialize(() => {
       rating TEXT,
       date TEXT,
       imageUrl TEXT,
+      noteColor TEXT,
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -49,6 +50,14 @@ db.serialize(() => {
       db.run("ALTER TABLE entries ADD COLUMN imageUrl TEXT", (alterErr) => {
         if (alterErr) {
           console.error("Failed to add imageUrl column.", alterErr.message);
+        }
+      });
+    }
+
+    if (!columnNames.has("noteColor")) {
+      db.run("ALTER TABLE entries ADD COLUMN noteColor TEXT", (alterErr) => {
+        if (alterErr) {
+          console.error("Failed to add noteColor column.", alterErr.message);
         }
       });
     }
