@@ -1,9 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const ALLOWED_NOTE_COLORS = new Set(["#000000", "#1D4ED8", "#B00020"]);
-const ALLOWED_NOTE_FONTS = new Set(["default", "serif", "mono"]);
+const ALLOWED_NOTE_COLORS = new Set([
+  "#F8F4E3",
+  "#E8F3E8",
+  "#E7F0FA",
+  "#F7E7E3",
+  "#EFE7FA",
+  "#F2F2F2",
+]);
 
+function normalizeNoteColor(noteColor) {
+  return ALLOWED_NOTE_COLORS.has(noteColor) ? noteColor : "#F8F4E3";
+}
+
+function normalizeNote(note) {
+  return typeof note === "string" ? note.trim() : "";
+}
 
 // GET all entries
 router.get("/", (req, res) => {
@@ -39,16 +52,24 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const { title, note, type, rating, date, imageUrl } = req.body;
+  const { title, note, type, rating, date, imageUrl, noteColor } = req.body;
 
   if (!title || !String(title).trim()) {
     return res.status(400).json({ error: "Title is required." });
   }
 
   db.run(
-    `INSERT INTO entries (title, note,type, rating, date, imageUrl, createdAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-    [title, note, type, rating, date, imageUrl],
+    `INSERT INTO entries (title, note, type, rating, date, imageUrl, noteColor, createdAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+    [
+      title,
+      normalizeNote(note),
+      type,
+      rating,
+      date,
+      imageUrl,
+      normalizeNoteColor(noteColor),
+    ],
     function (err) {
       if (err) {
         return res.status(500).json({ error: "Failed to create entry." });
@@ -66,7 +87,7 @@ router.post("/", (req, res) => {
 });
 
 router.put("/:id", (req, res) => {
-  const { title, note, type, rating, date, imageUrl } = req.body;
+  const { title, note, type, rating, date, imageUrl, noteColor } = req.body;
   const { id } = req.params;
 
   if (!title || !String(title).trim()) {
@@ -75,9 +96,18 @@ router.put("/:id", (req, res) => {
 
   db.run(
     `UPDATE entries
-     SET title = ?, note = ?, type = ?, rating = ?, date = ?, imageUrl = ?
+     SET title = ?, note = ?, type = ?, rating = ?, date = ?, imageUrl = ?, noteColor = ?
      WHERE id = ?`,
-    [title, note, type, rating, date, imageUrl, id],
+    [
+      title,
+      normalizeNote(note),
+      type,
+      rating,
+      date,
+      imageUrl,
+      normalizeNoteColor(noteColor),
+      id,
+    ],
     function (err) {
       if (err) {
         return res.status(500).json({ error: "Failed to update entry." });
