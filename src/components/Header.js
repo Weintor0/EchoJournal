@@ -4,6 +4,7 @@ import { FontSizes } from "../constants/typography";
 import { useLanguage } from "../hooks/useLanguage";
 
 const languageIcon = require("../assets/icons/language.png");
+const appIcon = require("../assets/icons/app_icon.png");
 
 export default function Header() {
   const router = useRouter();
@@ -11,6 +12,9 @@ export default function Header() {
   
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.appIconContainer} onPress={() => router.replace("/")}>
+        <Image source={appIcon} style={styles.appIcon} />
+      </TouchableOpacity>
       <TouchableOpacity style={styles.titleButton} onPress={() => router.replace("/")}>
         <Text style={styles.title} numberOfLines={2}>{t("appTitle")}</Text>
       </TouchableOpacity>
@@ -46,6 +50,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     maxWidth: "100%",
     textAlign: "center",
+    fontFamily: "Inter",
   },
   languageButton: {
     position: "absolute",
@@ -62,6 +67,15 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xxs,
     fontWeight: "700",
     color: "#000000",
-    marginTop: 1,
+    marginTop: 1, 
+  },
+  appIcon: {
+    width: 32,
+    height: 32,
+    resizeMode: "contain",
+  },
+  appIconContainer: {
+    position: "absolute",
+    left: 16,
   },
 });
