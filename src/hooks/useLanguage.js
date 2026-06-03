@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 const translations = {
   en: {
-    appTitle: "Personal Media Journal",
+    appTitle: "EchoJournal",
     languageName: "English",
     hello: "Hello, %{name}!",
     fallbackName: "there",
@@ -115,7 +115,7 @@ const translations = {
     entryTypeOther: "Other",
   },
   tr: {
-    appTitle: "Personal Media Journal",
+    appTitle: "EchoJournal",
     languageName: "T\u00fcrk\u00e7e",
     hello: "Merhaba, %{name}!",
     fallbackName: "orada",

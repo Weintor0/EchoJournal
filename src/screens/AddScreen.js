@@ -128,6 +128,7 @@ export default function AddScreen() {
       placeholderColor: '#666666',
       contentCSSText:
         'font-size: 16px; line-height: 22px; padding: 12px; min-height: 220px;',
+      cssText: '.pell-content p, .pell-content div { margin: 0; }',
     }),
     [noteColor]
   );

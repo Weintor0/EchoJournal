@@ -2,19 +2,20 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 function getApiBaseUrl() {
-  const configuredBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
-  if (typeof configuredBaseUrl === "string" && configuredBaseUrl.trim()) {
-    return configuredBaseUrl.replace(/\/$/, "");
-  }
-
   const hostUri =
     Constants.expoConfig?.hostUri ??
     Constants.expoGoConfig?.debuggerHost ??
     Constants.manifest2?.extra?.expoClient?.hostUri;
 
   const host = typeof hostUri === "string" ? hostUri.split(":")[0] : "";
-  if (host) {
+  if (__DEV__ && host) {
     return `http://${host}:3000`;
+  }
+
+  const configuredBaseUrl =
+    process.env.EXPO_PUBLIC_API_BASE_URL ?? Constants.expoConfig?.extra?.apiBaseUrl;
+  if (typeof configuredBaseUrl === "string" && configuredBaseUrl.trim()) {
+    return configuredBaseUrl.replace(/\/$/, "");
   }
 
   if (Platform.OS === "android") {
