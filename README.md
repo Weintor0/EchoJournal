@@ -1,50 +1,145 @@
 # EchoJournal
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+EchoJournal is a full-stack mobile journaling application that allows users to capture, organize, and manage personal entries with rich content support.
 
-## Get started
+The project consists of a React Native (Expo) frontend and a Node.js (Express) backend with a SQLite database. It is structured using npm workspaces to manage both frontend and backend dependencies from a single root.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+* Create, edit, and delete journal entries
+* Rich text editing support
+* Image selection and manipulation
+* Date-based journaling
+* Search and filtering functionality
+* Smooth animations and responsive UI
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Architecture
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Frontend:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+* React Native (Expo)
+* Expo Router and React Navigation
 
-## Get a fresh project
+Backend:
 
-When you're ready, run:
+* Node.js
+* Express
+
+Database:
+
+* SQLite (sqlite3)
+
+Project Structure:
+
+* Frontend and backend are managed via npm workspaces
+* Shared dependency management at the root level
+
+---
+
+## Tech Stack
+
+Frontend:
+
+* React Native (Expo)
+* Expo Router
+* React Navigation (Native Stack, Bottom Tabs)
+
+Media and Content:
+
+* Expo Image Picker
+* Expo Image Manipulator
+* React Native Render HTML
+* React Native WebView
+
+Backend:
+
+* Node.js
+* Express
+* SQLite (sqlite3)
+* CORS
+
+Utilities:
+
+* i18n-js
+* lodash
+
+---
+
+## Installation
+
+Clone the repository:
 
 ```bash
-npm run reset-project
+git clone https://github.com/your-username/echojournal.git
+cd echojournal
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Install all dependencies (frontend + backend via workspaces):
 
-## Learn more
+```bash
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Running the Project
 
-## Join the community
+Start the backend:
 
-Join our community of developers creating universal apps.
+```bash
+npm run start --workspace=backend
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Start the frontend:
+
+```bash
+npx expo start
+```
+
+---
+
+## Running the App
+
+You can run the mobile application using:
+
+* Android Emulator
+* iOS Simulator
+* Expo Go
+
+---
+
+## Project Purpose
+
+This project was developed to explore:
+
+* Full-stack mobile application development
+* Structuring scalable React Native projects
+* Integrating a backend API with a mobile client
+* Managing local databases with SQLite
+* Handling rich media and formatted content
+
+---
+
+## Future Improvements
+
+* Authentication and user accounts
+* Cloud synchronization
+* Tagging system and advanced search
+* Backup and restore functionality
+* Push notifications
+
+---
+
+## Author
+
+Umut Berke Hancıoğlu
+
+---
+
+## License
+
+This project is open-source and available under the MIT License.
