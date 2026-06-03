@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Header from '../components/Header';
+import HtmlNoteText from '../components/HtmlNoteText';
 import Navbar from '../components/Navbar';
 import TypeTag from '../components/TypeTag';
 import { FontSizes } from '../constants/typography';
@@ -11,6 +12,8 @@ import { useLanguage } from '../hooks/useLanguage';
 const starIcon = require('../assets/icons/star.png');
 const calendarIcon = require('../assets/icons/calendar.png');
 const noImagePlaceholder = require('../assets/no-image.png');
+const NOTE_COLORS = ['#F8F4E3', '#E8F3E8', '#E7F0FA', '#F7E7E3', '#EFE7FA', '#F2F2F2'];
+const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 
 export default function EntryDetailScreen() {
   const router = useRouter();
@@ -66,6 +69,7 @@ export default function EntryDetailScreen() {
   const date = entry?.date?.trim() ? entry.date : '-';
   const imageUrl = entry?.imageUrl?.trim() ? entry.imageUrl : '';
   const note = entry?.note?.trim() ? entry.note : t('noNotesYet');
+  const noteColor = NOTE_COLORS.includes(entry?.noteColor) ? entry.noteColor : DEFAULT_NOTE_COLOR;
 
   function handleEditPress() {
     if (!entryId) {
@@ -153,13 +157,9 @@ export default function EntryDetailScreen() {
 
             <View style={styles.thoughts}>
               <Text style={styles.sectionTitle}>{t('myThoughts')}</Text>
-              <Text
-                style={[
-                  styles.metaItem
-                ]}
-              >
-                {note}
-              </Text>
+              <View style={[styles.noteCard, { backgroundColor: noteColor }]}>
+                <HtmlNoteText html={note} fallback={t('noNotesYet')} style={styles.noteText} />
+              </View>
             </View>
 
             <View style={styles.editDelete}>
@@ -296,7 +296,21 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: FontSizes.xl,
     fontWeight: '600',
-    marginBottom: 6,
+    marginBottom: 10,
+  },
+
+  noteCard: {
+    minHeight: 160,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    padding: 12,
+  },
+
+  noteText: {
+    fontSize: FontSizes.m,
+    lineHeight: 22,
+    color: '#000000',
   },
 
   imageContainer: {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import HtmlNoteText from "./HtmlNoteText";
 import { FontSizes } from "../constants/typography";
 import { useLanguage } from "../hooks/useLanguage";
 import TypeTag from "./TypeTag";
@@ -65,9 +66,13 @@ export default function EntryCard({ entry, onPress, onDelete }) {
         <View style={styles.infoSection}>
           <Text style={styles.title} numberOfLines={2}>{safeEntry.title ?? t("untitled")}</Text>
 
-          <Text style={styles.preview} numberOfLines={2}>
-            {safeEntry.note ?? t("noNotesYet")}
-          </Text>
+          <HtmlNoteText
+            html={safeEntry.note}
+            fallback={t("noNotesYet")}
+            style={styles.preview}
+            numberOfLines={2}
+            preview
+          />
 
           <View style={styles.footer}>
             <TypeTag type={safeEntry.type} />
