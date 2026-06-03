@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 import { request } from './entries';
 
-const SESSION_STORAGE_KEY = 'personal-media-journal-session';
+const SESSION_STORAGE_KEY = 'echojournal-session';
 const SESSION_FILE_URI = FileSystem.documentDirectory
   ? `${FileSystem.documentDirectory}session.json`
   : '';

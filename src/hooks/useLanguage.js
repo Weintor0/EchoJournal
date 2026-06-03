@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 const translations = {
   en: {
-    appTitle: "Personal Media Journal",
+    appTitle: "EchoJournal",
     languageName: "English",
     hello: "Hello, %{name}!",
     fallbackName: "there",
@@ -30,6 +30,7 @@ const translations = {
     noImageSelected: "No image selected yet.",
     myThoughts: "My Thoughts",
     writeThoughts: "Write your thoughts...",
+    selectThoughtColor: "Select thought color",
     saving: "Saving...",
     titleRequired: "Title is required.",
     mediaPermissionRequired: "Media library permission is required to upload an image.",
@@ -114,7 +115,7 @@ const translations = {
     entryTypeOther: "Other",
   },
   tr: {
-    appTitle: "Personal Media Journal",
+    appTitle: "EchoJournal",
     languageName: "T\u00fcrk\u00e7e",
     hello: "Merhaba, %{name}!",
     fallbackName: "orada",
@@ -141,6 +142,7 @@ const translations = {
     noImageSelected: "Hen\u00fcz g\u00f6rsel se\u00e7ilmedi.",
     myThoughts: "D\u00fc\u015f\u00fcncelerim",
     writeThoughts: "D\u00fc\u015f\u00fcncelerini yaz...",
+    selectThoughtColor: "D\u00fc\u015f\u00fcnce rengini se\u00e7",
     saving: "Kaydediliyor...",
     titleRequired: "Ba\u015fl\u0131k zorunludur.",
     mediaPermissionRequired: "G\u00f6rsel y\u00fcklemek i\u00e7in medya k\u00fct\u00fcphanesi izni gerekiyor.",
