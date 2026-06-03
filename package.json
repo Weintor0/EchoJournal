@@ -2,6 +2,9 @@
   "name": "echojournal",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "workspaces": [
+    "backend"
+  ],
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
