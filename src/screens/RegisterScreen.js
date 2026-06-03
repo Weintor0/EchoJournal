@@ -75,11 +75,12 @@ export default function RegisterScreen() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
       >
         <Header />
         <View style={styles.register}>
@@ -154,6 +155,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     backgroundColor: '#E6E6E6',
+    paddingBottom: 32,
   },
   register: {
     flexGrow: 1,
